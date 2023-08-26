@@ -24,6 +24,9 @@
             android:key="app"
             android:title="@string/app_name" />
         <Preference
+            android:key="app"
+            android:title="StatusBarLyricExt" />
+        <Preference
             android:key="lyricview"
             android:title="LyricView" />
     </PreferenceCategory>

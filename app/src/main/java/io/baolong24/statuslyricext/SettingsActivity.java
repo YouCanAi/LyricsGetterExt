@@ -49,8 +49,9 @@ public class SettingsActivity extends FragmentActivity {
 
 
         // add urls
-        mUrlMap.put("app", "https://github.com/baolong24/StatusBarLyricExt");
-        mUrlMap.put("lyricview", "https://github.com/VictorModi/LyricsGetterExt");
+        mUrlMap.put("app", "https://github.com/VictorModi/LyricsGetterExt");
+        mUrlMap.put("StatusBarLyricExt", "https://github.com/KaguraRinko/StatusBarLyricExt");
+        mUrlMap.put("lyricview", "https://github.com/markzhai/LyricView");
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(Constants.NOTIFICATION_CHANNEL_LRC, "LRC", NotificationManager.IMPORTANCE_MIN);
