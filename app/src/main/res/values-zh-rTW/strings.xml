@@ -8,7 +8,7 @@
     <string name="dialog_delete_message">移除所選項目？</string>
     <string name="add_package_to_title">增加應用程式</string>
     <string name="enabled_title">開啟</string>
-    <string name="lyricsGetterStatus_title">LyricsGetter 连接状态</string>
+    <string name="lyricsGetterStatus_title">LyricsGetter 連線狀態</string>
     <string name="ignored_apps_title">忽略應用程式</string>
     <string name="unsupport_rom_summary">不支援目前 ROM</string>
     <string name="unsupport_rom_title">不支援</string>
