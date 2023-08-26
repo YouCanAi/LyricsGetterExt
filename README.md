@@ -1,4 +1,10 @@
-# StatusBarLyricExt
+# LyricsGetterExt
+
+基于 [KaguraRinko/StatusBarLyricExt](https://github.com/KaguraRinko/StatusBarLyricExt)
+
+仅是对 LyricsGetter 进行支持，去除了系统检测。
+
+# 原仓库 README
 
 这个工具可以为使用 [MediaSession](https://developer.android.google.cn/reference/android/media/session/MediaSession) 的音乐播放器添加状态栏歌词功能
 
