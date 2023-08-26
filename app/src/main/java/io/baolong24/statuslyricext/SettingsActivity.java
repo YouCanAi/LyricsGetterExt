@@ -12,6 +12,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.fragment.app.FragmentActivity;
@@ -23,6 +25,8 @@ import androidx.preference.SwitchPreference;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+
+import cn.lyric.getter.api.tools.EventTools;
 
 import io.baolong24.statuslyricext.misc.Constants;
 
@@ -40,7 +44,6 @@ public class SettingsActivity extends FragmentActivity {
                     .replace(R.id.content_frame, new SettingsFragment())
                     .commit();
         }
-
         Toolbar collapsingToolbar = findViewById(R.id.action_bar);
         setActionBar(collapsingToolbar);
 
@@ -91,21 +94,27 @@ public class SettingsActivity extends FragmentActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener {
 
         private SwitchPreference mEnabledPreference;
+        private Preference mConnectionStatusPreference;
         private int[] mNotificationFields = new int[2];
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
-            try {
-                mNotificationFields[0] =
-                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
-                mNotificationFields[1] =
-                        Notification.class.getDeclaredField("FLAG_ONLY_UPDATE_TICKER").getInt(null);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                mEnabledPreference.setEnabled(false);
-                mEnabledPreference.setTitle(R.string.unsupport_rom_title);
-                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
+            mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
+//            try {
+//                mNotificationFields[0] =
+//                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
+//                mNotificationFields[1] =
+//                        Notification.class.getDeclaredField("FLAG_ONLY_UPDATE_TICKER").getInt(null);
+//            } catch (NoSuchFieldException | IllegalAccessException e) {
+//                mEnabledPreference.setEnabled(false);
+//                mEnabledPreference.setTitle(R.string.unsupport_rom_title);
+//                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
+//            }
+            if (mConnectionStatusPreference != null){
+                if (EventTools.INSTANCE.getHasEnable())
+                    mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
             }
             if (mEnabledPreference != null) {
                 mEnabledPreference.setChecked(isNotificationListenerEnabled(getContext()));

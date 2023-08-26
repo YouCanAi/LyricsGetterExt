@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">StatusBarLyricExt</string>
+    <string name="app_name">LyricGetterExt</string>
 
     <string name="profile_choose_app">Choose app</string>
     <string name="dialog_delete_title">Delete</string>
@@ -10,6 +10,7 @@
     <string name="preferences_header">Prefreences</string>
     <string name="about_header">About</string>
     <string name="enabled_title">Enabled</string>
+    <string name="lyricsGetterStatus_title">LyricsGetter Connection Status</string>
     <string name="ignored_apps_title">Ignored apps</string>
 
     <!-- Unsupport ROM -->

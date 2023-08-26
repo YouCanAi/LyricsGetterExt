@@ -19,6 +19,7 @@ import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -28,9 +29,13 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.lyric.getter.api.tools.Tools;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
 import io.baolong24.statuslyricext.misc.Constants;
+
+import cn.lyric.getter.api.tools.EventTools;
+import cn.lyric.getter.api.tools.Tools.*;
 
 public class MusicListenerService extends NotificationListenerService {
 
@@ -217,6 +222,7 @@ public class MusicListenerService extends NotificationListenerService {
     private void stopLyric() {
         mHandler.removeCallbacks(mLyricUpdateRunnable);
         mNotificationManager.cancel(NOTIFICATION_ID_LRC);
+        EventTools.INSTANCE.stopLyric(getApplicationContext());
     }
 
     private void updateLyric(long position) {
@@ -228,6 +234,16 @@ public class MusicListenerService extends NotificationListenerService {
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
+            EventTools.INSTANCE.sendLyric(
+                    getApplicationContext(),
+                    sentence.content,
+                    true,
+                    Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)),
+                    false,
+                    "",
+                    getPackageName(),0
+            );
+            // Log.d("updateLyric", sentence.content);
         }
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">狀態欄歌詞擴充</string>
+    <string name="app_name">LyricGetter 擴充</string>
     <string name="about_header">關於</string>
     <string name="preferences_header">設定</string>
     <string name="profile_choose_app">選擇應用程式</string>
@@ -8,6 +8,7 @@
     <string name="dialog_delete_message">移除所選項目？</string>
     <string name="add_package_to_title">增加應用程式</string>
     <string name="enabled_title">開啟</string>
+    <string name="lyricsGetterStatus_title">LyricsGetter 连接状态</string>
     <string name="ignored_apps_title">忽略應用程式</string>
     <string name="unsupport_rom_summary">不支援目前 ROM</string>
     <string name="unsupport_rom_title">不支援</string>
