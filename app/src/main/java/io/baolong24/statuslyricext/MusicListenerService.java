@@ -272,4 +272,5 @@ public class MusicListenerService extends NotificationListenerService {
             handler.sendMessage(message);
         }
     }
+
 }

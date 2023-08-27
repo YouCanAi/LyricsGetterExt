@@ -2,6 +2,7 @@ package io.baolong24.statuslyricext;
 
 import android.content.Context;
 import android.media.MediaMetadata;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,8 +22,8 @@ public class LrcGetter {
 
     private static final ILrcProvider[] providers = {
             new KugouProvider(),
-            new QQMusicProvider(),
-            new NeteaseProvider()
+            new NeteaseProvider(),
+            new QQMusicProvider()
     };
 
     private static MessageDigest messageDigest;

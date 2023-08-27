@@ -10,11 +10,17 @@
     <string name="preferences_header">Prefreences</string>
     <string name="about_header">About</string>
     <string name="enabled_title">Enabled</string>
-    <string name="lyricsGetterStatus_title">LyricsGetter Connection Status</string>
+    <string name="lyricsGetterStatus_title">Lyrics Getter Connection Status</string>
     <string name="ignored_apps_title">Ignored apps</string>
+    <string name="ignored_rules_title">Input Ignored Apps Rules</string>
+    <string name="ignored_rules_summary">Import apps from Lyrics Getter Hook rules for ignoring, to avoid duplicate lyric outputs.</string>
 
     <!-- Unsupport ROM -->
     <string name="unsupport_rom_title">Unsupport</string>
     <string name="unsupport_rom_summary">Sorry, We don\'t support this ROM</string>
+
+    <!-- Toast -->
+    <string name="toast_cannot_start_lyricsgetter">Sorry, Lyrics Getter does not start, please check if LyricsGetter is installed properly!</string>
+    <string name="toast_cannot_get_rules">Sorry, Get Rules Failed. Please Check Your Network.</string>
 
 </resources>

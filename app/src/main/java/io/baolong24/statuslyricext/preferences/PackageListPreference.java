@@ -23,18 +23,31 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ListView;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import io.baolong24.statuslyricext.R;
 import io.baolong24.statuslyricext.misc.Constants;
 import io.baolong24.statuslyricext.preferences.PackageListAdapter.PackageItem;
+import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
 
 public class PackageListPreference extends PreferenceCategory implements
         Preference.OnPreferenceClickListener {
@@ -45,8 +58,13 @@ public class PackageListPreference extends PreferenceCategory implements
     private final PackageManager mPackageManager;
 
     private final Preference mAddPackagePref;
+    private final Preference mAddRuleIgnorePref;
 
     private final ArrayList<String> mPackages = new ArrayList<>();
+
+    private static final String RULES_FULL_URL = "https://raw.githubusercontent.com/xiaowine/Lyric-Getter/master/app/src/main/assets/app_rules.json";
+
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public PackageListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,6 +74,7 @@ public class PackageListPreference extends PreferenceCategory implements
         mPackageAdapter = new PackageListAdapter(mContext);
 
         mAddPackagePref = makeAddPref();
+        mAddRuleIgnorePref = makeAddRuleIgnorePref();
 
         this.setOrderingAsAdded(false);
     }
@@ -65,6 +84,14 @@ public class PackageListPreference extends PreferenceCategory implements
         pref.setTitle(R.string.add_package_to_title);
         pref.setIcon(R.drawable.ic_add);
         pref.setPersistent(false);
+        pref.setOnPreferenceClickListener(this);
+        return pref;
+    }
+
+    private Preference makeAddRuleIgnorePref() {
+        Preference pref = new Preference(mContext);
+        pref.setTitle(R.string.ignored_rules_title);
+        pref.setSummary(R.string.ignored_rules_summary);
         pref.setOnPreferenceClickListener(this);
         return pref;
     }
@@ -91,6 +118,7 @@ public class PackageListPreference extends PreferenceCategory implements
         parsePackageList();
         removeAll();
         addPreference(mAddPackagePref);
+        addPreference(mAddRuleIgnorePref);
         for (String pkg : mPackages) {
             addPackageToPref(pkg);
         }
@@ -158,6 +186,17 @@ public class PackageListPreference extends PreferenceCategory implements
                 dialog.cancel();
             });
             dialog.show();
+
+        } else if (preference == mAddRuleIgnorePref) {
+            mAddRuleIgnorePref.setEnabled(false);
+            executorService.execute(() -> {
+                try {
+                    addIgnorePackagesFormRules();
+                } catch (Exception e) {
+                    Log.d("Error", String.valueOf(e));
+                }
+            });
+            mAddRuleIgnorePref.setEnabled(true);
         } else if (preference == findPreference(preference.getKey())) {
             builder.setTitle(R.string.dialog_delete_title)
                 .setMessage(R.string.dialog_delete_message)
@@ -170,5 +209,26 @@ public class PackageListPreference extends PreferenceCategory implements
         }
         return true;
     }
+    public void addIgnorePackagesFormRules() throws IOException{
 
+        try {
+            JSONObject jsonObject = HttpRequestUtil.getJsonResponse(RULES_FULL_URL);
+                    if (jsonObject != null) {
+                    JSONArray appRulesArray = jsonObject.getJSONArray("appRules");
+                    String[] packageNames = new String[appRulesArray.length()];
+                    for (int i = 0; i < appRulesArray.length(); i++) {
+                        JSONObject appRule = appRulesArray.getJSONObject(i);
+                        String packageName = appRule.getString("packageName");
+                        packageNames[i] = packageName;
+                    }
+                    for (String packageName : packageNames) {
+                        addPackageToList(packageName);
+                    }
+                    savePackagesList();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

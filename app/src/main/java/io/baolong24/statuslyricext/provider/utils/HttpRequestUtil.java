@@ -1,6 +1,7 @@
 package io.baolong24.statuslyricext.provider.utils;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,7 @@ public class HttpRequestUtil {
             // 处理搜索结果
             InputStream in = connection.getInputStream();
             byte[] data = readStream(in);
+            // Log.d("data", new String(data));
             JSONObject jsonObject = new JSONObject(new String(data));
             in.close();
             connection.disconnect();

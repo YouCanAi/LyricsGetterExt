@@ -22,6 +22,10 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +33,12 @@ import java.util.Map;
 import cn.lyric.getter.api.tools.EventTools;
 
 import io.baolong24.statuslyricext.misc.Constants;
+import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
 
 public class SettingsActivity extends FragmentActivity {
 
     private final static Map<String, String> mUrlMap = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,12 +119,31 @@ public class SettingsActivity extends FragmentActivity {
 //                mEnabledPreference.setTitle(R.string.unsupport_rom_title);
 //                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
 //            }
+            mConnectionStatusPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent();
+                    // Open LyricsGetter
+                    try {
+                        intent.setComponent(new ComponentName("cn.lyric.getter", "cn.lyric.getter.ui.activity.MainActivity"));
+                        startActivity(intent);
+                    } catch (android.content.ActivityNotFoundException e) {
+                        Toast.makeText(getContext(), R.string.toast_cannot_start_lyricsgetter, Toast.LENGTH_SHORT).show();
+                    }
+                    // 启动活动
+                    return true;
+                }
+            }
+            );
             if (mConnectionStatusPreference != null){
-                if (EventTools.INSTANCE.getHasEnable())
-                    mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
+                mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
             }
             if (mEnabledPreference != null) {
                 mEnabledPreference.setChecked(isNotificationListenerEnabled(getContext()));
+                if (!EventTools.INSTANCE.getHasEnable()){
+                    mEnabledPreference.setEnabled(false);
+                    mEnabledPreference.setChecked(false);
+                }
                 mEnabledPreference.setOnPreferenceClickListener(this);
             }
             Preference appInfoPreference = findPreference("app");
@@ -155,5 +180,7 @@ public class SettingsActivity extends FragmentActivity {
             }
             return true;
         }
+
+
     }
-}
+ }
