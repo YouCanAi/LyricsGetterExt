@@ -247,13 +247,19 @@ public class MusicListenerService extends NotificationListenerService {
 
     private void updateLyric(long position) {
         if (mNotificationManager == null || mLyric == null) return;
-        int delay;
+        long mdelay;
+        int sdelay;
         Lyric.Sentence sentence = LyricUtils.getSentence(mLyric, position);
         Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
-            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000;
-            // Log.d("delay", String.valueOf(delay));
+            mdelay = nextSentence.fromTime - sentence.fromTime;
+            sdelay = (int) mdelay / 1000 - 1; // 偏移一秒
+            if (sdelay < 0){
+                sdelay = 0;
+            }
+            // 实测歌曲梅菲斯特在歌词 This lie is ***** the world 会无法展示完全
+            Log.d("delayFilter", "m:" + String.valueOf(mdelay) + " s:" + String.valueOf(sdelay));
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
@@ -266,7 +272,7 @@ public class MusicListenerService extends NotificationListenerService {
                     false,
                     "",
                     getPackageName(),
-                    delay
+                    sdelay
             );
             // Log.d("mLyric", mLyric.toString());
         }
