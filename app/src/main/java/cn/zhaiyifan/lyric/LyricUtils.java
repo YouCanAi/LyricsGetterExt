@@ -286,4 +286,11 @@ public class LyricUtils {
             return Integer.MAX_VALUE;
         }
     }
+
+    public static Sentence getNextSentence(Lyric lyric, long ts) {
+        int found = getSentenceIndex(lyric, ts, 0, 0);
+        if (found == -1)
+            return null;
+        return lyric.sentenceList.get(found + 1);
+    }
 }

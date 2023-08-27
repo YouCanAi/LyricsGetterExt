@@ -1,6 +1,5 @@
 package io.baolong24.statuslyricext;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -12,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -22,18 +20,12 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import cn.lyric.getter.api.tools.EventTools;
 
 import io.baolong24.statuslyricext.misc.Constants;
-import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
 
 public class SettingsActivity extends FragmentActivity {
 
@@ -102,7 +94,6 @@ public class SettingsActivity extends FragmentActivity {
 
         private SwitchPreference mEnabledPreference;
         private Preference mConnectionStatusPreference;
-        private int[] mNotificationFields = new int[2];
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

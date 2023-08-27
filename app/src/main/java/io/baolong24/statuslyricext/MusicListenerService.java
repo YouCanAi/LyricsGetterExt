@@ -152,6 +152,26 @@ public class MusicListenerService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
+//        StatusBarNotification statusBarNotification = sbn;
+//        Notification notification = statusBarNotification.getNotification();
+//            if (statusBarNotification.isClearable()){
+//                if (notification != null) {
+//                    String title = notification.extras.getString(Notification.EXTRA_TITLE);
+//                    String text = notification.extras.getString(Notification.EXTRA_TEXT);
+//                    if(title != null || text != null) {
+//                        // Log.d("oNP", title);
+//                        EventTools.INSTANCE.sendLyric(
+//                                getApplicationContext(),
+//                                title + " : " + text,
+//                                true,
+//                                Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)),
+//                                false,
+//                                "",
+//                                getPackageName(), 1
+//                        );
+//                    }
+//                }
+//        }
     }
 
     @Override
@@ -227,9 +247,13 @@ public class MusicListenerService extends NotificationListenerService {
 
     private void updateLyric(long position) {
         if (mNotificationManager == null || mLyric == null) return;
+        int delay;
         Lyric.Sentence sentence = LyricUtils.getSentence(mLyric, position);
+        Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
+            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000;
+            // Log.d("delay", String.valueOf(delay));
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
@@ -241,9 +265,10 @@ public class MusicListenerService extends NotificationListenerService {
                     Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)),
                     false,
                     "",
-                    getPackageName(),0
+                    getPackageName(),
+                    delay
             );
-            // Log.d("updateLyric", sentence.content);
+            // Log.d("mLyric", mLyric.toString());
         }
     }
 
