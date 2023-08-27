@@ -291,8 +291,10 @@ public class LyricUtils {
         int found = getSentenceIndex(lyric, ts, 0, 0);
         if (found == -1)
             return null;
-        if (found + 1 > lyric.sentenceList.size())
-            return lyric.sentenceList.get(found);
-        return lyric.sentenceList.get(found + 1);
+        if (found + 1 < lyric.sentenceList.size()) {
+            return lyric.sentenceList.get(found + 1);
+        } else {
+        return lyric.sentenceList.get(found);
+        }
     }
 }
