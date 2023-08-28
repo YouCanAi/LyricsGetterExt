@@ -1,4 +1,4 @@
-package io.baolong24.statuslyricext.provider;
+package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
 
@@ -12,8 +12,8 @@ import java.util.Locale;
 import android.util.Base64;
 import android.util.Pair;
 
-import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
-import io.baolong24.statuslyricext.provider.utils.LyricSearchUtil;
+import statusbar.finder.provider.utils.HttpRequestUtil;
+import statusbar.finder.provider.utils.LyricSearchUtil;
 
 public class KugouProvider implements ILrcProvider {
 

@@ -1,4 +1,4 @@
-package io.baolong24.statuslyricext.provider;
+package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
 import android.util.Pair;
@@ -10,8 +10,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Locale;
 
-import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
-import io.baolong24.statuslyricext.provider.utils.LyricSearchUtil;
+import statusbar.finder.provider.utils.HttpRequestUtil;
+import statusbar.finder.provider.utils.LyricSearchUtil;
 
 public class NeteaseProvider implements ILrcProvider {
 

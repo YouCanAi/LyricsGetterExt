@@ -1,4 +1,4 @@
-package io.baolong24.statuslyricext;
+package statusbar.finder;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,6 +15,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 import cn.lyric.getter.api.tools.EventTools;
 
-import io.baolong24.statuslyricext.misc.Constants;
+import statusbar.finder.misc.Constants;
 
 public class SettingsActivity extends FragmentActivity {
 
@@ -48,7 +49,7 @@ public class SettingsActivity extends FragmentActivity {
 
         // add urls
         mUrlMap.put("app", "https://github.com/VictorModi/LyricsGetterExt");
-        mUrlMap.put("StatusBarLyricExt", "https://github.com/KaguraRinko/StatusBarLyricExt");
+        mUrlMap.put("statusbarlyricext", "https://github.com/KaguraRinko/StatusBarLyricExt");
         mUrlMap.put("lyricview", "https://github.com/markzhai/LyricView");
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -90,16 +91,20 @@ public class SettingsActivity extends FragmentActivity {
         return versionName;
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceClickListener {
+    public static class SettingsFragment
+            extends PreferenceFragmentCompat
+            implements Preference.OnPreferenceClickListener,Preference.OnPreferenceChangeListener {
 
         private SwitchPreference mEnabledPreference;
         private Preference mConnectionStatusPreference;
+        private EditTextPreference mMusixMatchToken;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
+            mMusixMatchToken = findPreference("musixmatch_token");
 //            try {
 //                mNotificationFields[0] =
 //                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
@@ -110,24 +115,13 @@ public class SettingsActivity extends FragmentActivity {
 //                mEnabledPreference.setTitle(R.string.unsupport_rom_title);
 //                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
 //            }
-            mConnectionStatusPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent();
-                    // Open LyricsGetter
-                    try {
-                        intent.setComponent(new ComponentName("cn.lyric.getter", "cn.lyric.getter.ui.activity.MainActivity"));
-                        startActivity(intent);
-                    } catch (android.content.ActivityNotFoundException e) {
-                        Toast.makeText(getContext(), R.string.toast_cannot_start_lyricsgetter, Toast.LENGTH_SHORT).show();
-                    }
-                    // 启动活动
-                    return true;
-                }
+//            );
+            if (mMusixMatchToken != null) {
+                mMusixMatchToken.setOnPreferenceChangeListener(this);
             }
-            );
             if (mConnectionStatusPreference != null){
                 mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
+                mConnectionStatusPreference.setOnPreferenceClickListener(this);
             }
             if (mEnabledPreference != null) {
                 mEnabledPreference.setChecked(isNotificationListenerEnabled(getContext()));
@@ -162,6 +156,17 @@ public class SettingsActivity extends FragmentActivity {
         public boolean onPreferenceClick(Preference preference) {
             if (preference == mEnabledPreference) {
                 startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+            } else if(preference == mConnectionStatusPreference) {
+                Intent intent = new Intent();
+                // Open LyricsGetter
+                try {
+                    intent.setComponent(new ComponentName("cn.lyric.getter", "cn.lyric.getter.ui.activity.MainActivity"));
+                    startActivity(intent);
+                } catch (android.content.ActivityNotFoundException e) {
+                    Toast.makeText(getContext(), R.string.toast_cannot_start_lyricsgetter, Toast.LENGTH_SHORT).show();
+                }
+                // 启动活动
+                return true;
             } else {
                 String url = mUrlMap.get(preference.getKey());
                 if (TextUtils.isEmpty(url)) return false;
@@ -173,5 +178,12 @@ public class SettingsActivity extends FragmentActivity {
         }
 
 
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            if (preference == mMusixMatchToken){
+                Constants.MUSIXMATCH_USERTOKEN = (String) newValue;
+            }
+            return false;
+        }
     }
  }

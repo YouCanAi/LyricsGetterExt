@@ -1,4 +1,4 @@
-package io.baolong24.statuslyricext.provider.utils;
+package statusbar.finder.provider.utils;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,8 +11,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 
 public class HttpRequestUtil {
+    static {
+    // 创建 Cookie 管理器
+    CookieManager cookieManager = new CookieManager();
+    CookieHandler.setDefault(cookieManager);
+}
 
     public static JSONObject getJsonResponse(String url) throws IOException, JSONException {
         return getJsonResponse(url, null);

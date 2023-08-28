@@ -1,29 +1,29 @@
-package io.baolong24.statuslyricext;
+package statusbar.finder;
 
 import android.content.Context;
 import android.media.MediaMetadata;
-import android.util.Log;
+
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
-import io.baolong24.statuslyricext.provider.ILrcProvider;
-import io.baolong24.statuslyricext.provider.KugouProvider;
-import io.baolong24.statuslyricext.provider.NeteaseProvider;
-import io.baolong24.statuslyricext.provider.QQMusicProvider;
-import io.baolong24.statuslyricext.provider.utils.LyricSearchUtil;
+import statusbar.finder.provider.*;
+import statusbar.finder.provider.utils.LyricSearchUtil;
 
 public class LrcGetter {
 
     private static final ILrcProvider[] providers = {
             new KugouProvider(),
+            new QQMusicProvider(),
             new NeteaseProvider(),
-            new QQMusicProvider()
+            new MusixMatchProvider()
     };
 
     private static MessageDigest messageDigest;
@@ -52,7 +52,7 @@ public class LrcGetter {
                 if (lyricResult != null && LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
                     currentResult = lyricResult;
                 }
-            } catch (IOException e) {
+            } catch (IOException | JSONException | URISyntaxException e) {
                 e.printStackTrace();
             }
         }

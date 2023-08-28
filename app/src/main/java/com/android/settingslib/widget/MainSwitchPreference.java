@@ -27,7 +27,7 @@ import androidx.preference.TwoStatePreference;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.baolong24.statuslyricext.R;
+import statusbar.finder.R;
 
 /**
  * MainSwitchPreference is a Preference with a customized Switch.

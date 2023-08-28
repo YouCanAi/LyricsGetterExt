@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.baolong24.statuslyricext.preferences;
+package statusbar.finder.preferences;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -25,10 +25,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ListView;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
@@ -44,10 +40,10 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.baolong24.statuslyricext.R;
-import io.baolong24.statuslyricext.misc.Constants;
-import io.baolong24.statuslyricext.preferences.PackageListAdapter.PackageItem;
-import io.baolong24.statuslyricext.provider.utils.HttpRequestUtil;
+import statusbar.finder.R;
+import statusbar.finder.misc.Constants;
+import statusbar.finder.preferences.PackageListAdapter.PackageItem;
+import statusbar.finder.provider.utils.HttpRequestUtil;
 
 public class PackageListPreference extends PreferenceCategory implements
         Preference.OnPreferenceClickListener {

@@ -1,4 +1,4 @@
-package io.baolong24.statuslyricext.misc;
+package statusbar.finder.misc;
 
 import java.util.HashSet;
 import java.util.Set;

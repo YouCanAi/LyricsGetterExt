@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.baolong24.statuslyricext">
+    package="statusbar.finder">
 
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
         tools:ignore="ProtectedPermissions" />
@@ -19,7 +19,7 @@
         android:theme="@style/Theme.SubSettingsBase">
 
         <service
-            android:name="io.baolong24.statuslyricext.MusicListenerService"
+            android:name="statusbar.finder.MusicListenerService"
             android:enabled="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
@@ -28,7 +28,7 @@
         </service>
 
         <activity
-            android:name="io.baolong24.statuslyricext.SettingsActivity"
+            android:name="statusbar.finder.SettingsActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

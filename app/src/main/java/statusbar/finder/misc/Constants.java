@@ -1,10 +1,10 @@
-package io.baolong24.statuslyricext.misc;
+package statusbar.finder.misc;
 
 public class Constants {
     public static final String SHARED_PREFERENCES_NAME = "preferences";
 
     public static final String PREFERENCE_KEY_ENABLED = "enabled";
-    public static final String PREFERENCE_KEY_CONNECTION_STATUS = "ConnectionStatus";
+    public static final String PREFERENCE_KEY_CONNECTION_STATUS = "connection_status";
     public static final String PREFERENCE_KEY_ABOUT = "about";
     public static final String PREFERENCE_KEY_IGNORED_PACKAGES = "ignored_packages";
 
@@ -16,4 +16,6 @@ public class Constants {
     public static final String BROADCAST_IGNORED_APP_CHANGED = "ignored_app_changed";
 
     public static final String SETTINGS_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+
+    public static String MUSIXMATCH_USERTOKEN = "";
 }
