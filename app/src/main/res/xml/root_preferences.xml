@@ -17,13 +17,6 @@
             android:dependency="enabled" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Provider">
-        <EditTextPreference
-            android:key="musixmatch_token"
-            android:title="musixmatch_token"/>
-    </PreferenceCategory>
-
-
     <PreferenceCategory android:title="@string/about_header"
         android:key="about">
 

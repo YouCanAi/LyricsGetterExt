@@ -20,10 +20,11 @@ import statusbar.finder.provider.utils.LyricSearchUtil;
 public class LrcGetter {
 
     private static final ILrcProvider[] providers = {
+            new MusixMatchProvider(),
             new KugouProvider(),
             new QQMusicProvider(),
             new NeteaseProvider(),
-            new MusixMatchProvider()
+
     };
 
     private static MessageDigest messageDigest;
@@ -52,7 +53,7 @@ public class LrcGetter {
                 if (lyricResult != null && LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
                     currentResult = lyricResult;
                 }
-            } catch (IOException | JSONException | URISyntaxException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

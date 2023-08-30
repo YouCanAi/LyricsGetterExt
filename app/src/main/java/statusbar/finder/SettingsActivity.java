@@ -15,7 +15,6 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -93,18 +92,16 @@ public class SettingsActivity extends FragmentActivity {
 
     public static class SettingsFragment
             extends PreferenceFragmentCompat
-            implements Preference.OnPreferenceClickListener,Preference.OnPreferenceChangeListener {
+            implements Preference.OnPreferenceClickListener {
 
         private SwitchPreference mEnabledPreference;
         private Preference mConnectionStatusPreference;
-        private EditTextPreference mMusixMatchToken;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
-            mMusixMatchToken = findPreference("musixmatch_token");
 //            try {
 //                mNotificationFields[0] =
 //                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
@@ -116,9 +113,6 @@ public class SettingsActivity extends FragmentActivity {
 //                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
 //            }
 //            );
-            if (mMusixMatchToken != null) {
-                mMusixMatchToken.setOnPreferenceChangeListener(this);
-            }
             if (mConnectionStatusPreference != null){
                 mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
                 mConnectionStatusPreference.setOnPreferenceClickListener(this);
@@ -175,15 +169,6 @@ public class SettingsActivity extends FragmentActivity {
                 startActivity(intent);
             }
             return true;
-        }
-
-
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-            if (preference == mMusixMatchToken){
-                Constants.MUSIXMATCH_USERTOKEN = (String) newValue;
-            }
-            return false;
         }
     }
  }

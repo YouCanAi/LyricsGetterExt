@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public interface ILrcProvider {
-    LyricResult getLyric(MediaMetadata data) throws IOException, JSONException, URISyntaxException;
+    LyricResult getLyric(MediaMetadata data) throws IOException;
 
     class LyricResult {
         public String mLyric;

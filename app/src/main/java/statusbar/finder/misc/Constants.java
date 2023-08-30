@@ -17,5 +17,4 @@ public class Constants {
 
     public static final String SETTINGS_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
-    public static String MUSIXMATCH_USERTOKEN = "";
 }

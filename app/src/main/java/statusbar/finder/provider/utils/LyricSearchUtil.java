@@ -124,35 +124,4 @@ public class LyricSearchUtil {
         return LyricContentPattern.matcher(content).find();
     }
 
-    public static String[] getMusixMatchSearchKey(MediaMetadata metadata) {
-        String title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String album = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        String artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String[] ret = new String[3];
-
-        if (ZhConverterUtil.isSimple(title)) {
-            if (!(checkStringLang.isJapenese(title)))
-                title = ZhConverterUtil.toTraditional(title);
-        }
-        if (ZhConverterUtil.isSimple(artist)) {
-            if (!(checkStringLang.isJapenese(artist)))
-                artist = ZhConverterUtil.toTraditional(artist);
-        }
-        if (ZhConverterUtil.isSimple(album)) {
-            if (!(checkStringLang.isJapenese(album)))
-                album = ZhConverterUtil.toTraditional(album);
-        }
-
-        try {
-            ret[0] = URLEncoder.encode(title, "UTF-8");
-            ret[1] = URLEncoder.encode(artist, "UTF-8");
-            ret[2] = URLEncoder.encode(album, "UTF-8");
-            return ret;
-        } catch (UnsupportedEncodingException e) {
-            ret[0] = title;
-            ret[1] = artist;
-            ret[2] = album;
-            return ret;
-        }
-    }
 }

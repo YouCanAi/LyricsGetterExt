@@ -19,7 +19,7 @@ import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.util.Log;
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -28,6 +28,8 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import cn.lyric.getter.api.tools.Tools;
 import cn.zhaiyifan.lyric.LyricUtils;
@@ -53,6 +55,8 @@ public class MusicListenerService extends NotificationListenerService {
     private String requiredLrcTitle;
     private Notification mLyricNotification;
     private long mLastSentenceFromTime = -1;
+
+    private String systemLanguage;
 
     private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -158,7 +162,6 @@ public class MusicListenerService extends NotificationListenerService {
 //                    String title = notification.extras.getString(Notification.EXTRA_TITLE);
 //                    String text = notification.extras.getString(Notification.EXTRA_TEXT);
 //                    if(title != null || text != null) {
-//                        // Log.d("oNP", title);
 //                        EventTools.INSTANCE.sendLyric(
 //                                getApplicationContext(),
 //                                title + " : " + text,
@@ -180,6 +183,8 @@ public class MusicListenerService extends NotificationListenerService {
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
+        systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+        // Log.d("systemLanguage", systemLanguage);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mLyricNotification = buildLrcNotification();
@@ -246,33 +251,24 @@ public class MusicListenerService extends NotificationListenerService {
 
     private void updateLyric(long position) {
         if (mNotificationManager == null || mLyric == null) return;
-        long mdelay;
-        int sdelay;
+        int delay;
         Lyric.Sentence sentence = LyricUtils.getSentence(mLyric, position);
         Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
-            mdelay = nextSentence.fromTime - sentence.fromTime;
-            sdelay = (int) mdelay / 1000 - 1; // 偏移一秒
-            if (sdelay < 0){
-                sdelay = 0;
-            }
-            // 实测歌曲梅菲斯特在歌词 This lie is ***** the world 会无法展示完全
-            Log.d("delayFilter", "m:" + String.valueOf(mdelay) + " s:" + String.valueOf(sdelay));
+            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 2; // 偏移一秒
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            EventTools.INSTANCE.sendLyric(
-                    getApplicationContext(),
-                    sentence.content,
-                    true,
-                    Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)),
-                    false,
-                    "",
-                    getPackageName(),
-                    sdelay
-            );
+            if(Objects.equals(systemLanguage, "zh-CN") && !ZhConverterUtil.isSimple(sentence.content)){
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toSimple(sentence.content), true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
+            } else if (Objects.equals(systemLanguage, "zh-TW") && !ZhConverterUtil.isTraditional(sentence.content)) {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toTraditional(sentence.content), true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
+            } else {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
+            }
+
             // Log.d("mLyric", mLyric.toString());
         }
     }
