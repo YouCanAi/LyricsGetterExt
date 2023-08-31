@@ -189,7 +189,7 @@ public class PackageListPreference extends PreferenceCategory implements
                 try {
                     addIgnorePackagesFormRules();
                 } catch (Exception e) {
-                    Log.d("Error", String.valueOf(e));
+                    e.printStackTrace();
                 }
             });
             mAddRuleIgnorePref.setEnabled(true);

@@ -24,7 +24,6 @@ public class LrcGetter {
             new KugouProvider(),
             new QQMusicProvider(),
             new NeteaseProvider(),
-
     };
 
     private static MessageDigest messageDigest;

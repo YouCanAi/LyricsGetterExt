@@ -56,6 +56,7 @@ public class MusixMatchProvider implements ILrcProvider {
             subTitleJson = lrcFullJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle");
             result.mLyric = subTitleJson.getString("subtitle_body");
             result.mDistance = subTitleJson.getLong("subtitle_length") * 1000;
+            result.source = "MusixMatch";
             return result;
         } catch (JSONException e) {
             e.printStackTrace();

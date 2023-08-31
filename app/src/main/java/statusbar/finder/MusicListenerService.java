@@ -256,11 +256,13 @@ public class MusicListenerService extends NotificationListenerService {
         Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
-            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 2; // 偏移一秒
+            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 1; // 偏移一秒
+            if (delay < 1){delay = 1;}
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
+            // Translate For zh
             if(Objects.equals(systemLanguage, "zh-CN") && !ZhConverterUtil.isSimple(sentence.content)){
                 EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toSimple(sentence.content), true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
             } else if (Objects.equals(systemLanguage, "zh-TW") && !ZhConverterUtil.isTraditional(sentence.content)) {
@@ -268,7 +270,6 @@ public class MusicListenerService extends NotificationListenerService {
             } else {
                 EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
             }
-
             // Log.d("mLyric", mLyric.toString());
         }
     }
