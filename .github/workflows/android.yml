@@ -25,6 +25,7 @@ jobs:
 
     - name: Build with Gradle
       run: |
+        ./gradlew updateLintBaseline
         ./gradlew assemble
         ./gradlew bundleRelease
 
