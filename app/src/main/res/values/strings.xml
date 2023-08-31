@@ -22,5 +22,6 @@
     <!-- Toast -->
     <string name="toast_cannot_start_lyricsgetter">Sorry, Lyrics Getter does not start, please check if LyricsGetter is installed properly!</string>
     <string name="toast_cannot_get_rules">Sorry, Get Rules Failed. Please Check Your Network.</string>
+    <string name="toast_get_notification_permission">Notification permission not granted. Please allow notification permission for this app in the next screen.</string>
 
 </resources>

@@ -22,12 +22,12 @@ public class MusixMatchProvider implements ILrcProvider {
     private static String MUSIXMATCH_USERTOKEN;
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        JSONObject tokenJson;
         JSONObject lrcFullJson;
         String lrcUrl;
         if (MUSIXMATCH_USERTOKEN  == null) {
             try{
                 // Form Google
+                JSONObject tokenJson;
                 String tokenURL = String.format(MUSIXMATCH_TOKEN_URL_FORMAT, "");
                 tokenJson = HttpRequestUtil.getJsonResponse(tokenURL);
                 MUSIXMATCH_USERTOKEN = tokenJson.getJSONObject("message").getJSONObject("body").getString("user_token");

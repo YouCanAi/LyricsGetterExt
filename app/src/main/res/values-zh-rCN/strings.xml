@@ -16,4 +16,5 @@
     <string name="unsupport_rom_title">不支持</string>
     <string name="toast_cannot_start_lyricsgetter">很抱歉， Lyrics Getter 启动失败。请检查是否正确安装LyricsGetter。</string>
     <string name="toast_cannot_get_rules">很抱歉，忽略应用规则更新失败，请检查您的网络配置。</string>
+    <string name="toast_get_notification_permission">未获取到通知权限，请在下一界面允许本应用的通知权限。</string>
 </resources>

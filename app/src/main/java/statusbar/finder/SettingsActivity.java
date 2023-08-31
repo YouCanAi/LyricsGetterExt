@@ -8,12 +8,14 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -22,6 +24,7 @@ import androidx.preference.SwitchPreference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import cn.lyric.getter.api.tools.EventTools;
 
@@ -51,12 +54,29 @@ public class SettingsActivity extends FragmentActivity {
         mUrlMap.put("statusbarlyricext", "https://github.com/KaguraRinko/StatusBarLyricExt");
         mUrlMap.put("lyricview", "https://github.com/markzhai/LyricView");
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(Constants.NOTIFICATION_CHANNEL_LRC, "LRC", NotificationManager.IMPORTANCE_MIN);
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-            }
+        NotificationChannel channel = new NotificationChannel(Constants.NOTIFICATION_CHANNEL_LRC, "LRC", NotificationManager.IMPORTANCE_MIN);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    public static void enableNotification(Context context) {
+        try {
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE,context. getPackageName());
+            intent.putExtra(Settings.EXTRA_CHANNEL_ID, context.getApplicationInfo().uid);
+            intent.putExtra("app_package", context.getPackageName());
+            intent.putExtra("app_uid", context.getApplicationInfo().uid);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package",context. getPackageName(), null);
+            intent.setData(uri);
+            context.startActivity(intent);
         }
     }
 
@@ -100,6 +120,11 @@ public class SettingsActivity extends FragmentActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            NotificationManagerCompat manager = NotificationManagerCompat.from(requireContext());
+            if (!manager.areNotificationsEnabled()) {
+                Toast.makeText(requireContext(), R.string.toast_get_notification_permission, Toast.LENGTH_LONG).show();
+                enableNotification(requireContext());
+            }
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
 //            try {
