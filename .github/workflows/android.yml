@@ -29,7 +29,7 @@ jobs:
         ./gradlew bundleRelease
 
     - name: Upload Debug APK
-      users: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       with:
         name: Debug APK
         path: ./app/build/outputs/apk/debug
