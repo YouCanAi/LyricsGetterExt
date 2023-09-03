@@ -45,7 +45,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     track,
                     artist,
                     album);
-        }catch (UnsupportedEncodingException e){
+        }catch (UnsupportedEncodingException | java.lang.NullPointerException e){
             e.printStackTrace();
             return null;
         }

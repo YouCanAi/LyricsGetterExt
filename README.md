@@ -8,7 +8,7 @@
 
 使用 [xiaowine/Lyric-Getter-Api](https://github.com/xiaowine/Lyric-Getter-Api) 推送歌词。
 
-请在 Xposed 管理器内对 [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) 勾选 LyricsGetterExt ， 否则无法正常推送歌词。（目前本项目不在 Lyrics Getter 推荐作用域列表，请手动搜索勾选。）
+请在 Xposed 管理器内对 [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) 勾选 LyricsGetterExt ， 否则无法正常推送歌词。~~（目前本项目不在 Lyrics Getter 推荐作用域列表，请手动搜索勾选。）~~(目前已通过pr将本项目添加至 “推荐应用” 列表，在使用前注意查看是否正常勾选)
 
 不对稳定性做任何保证，因为上面也提到，我没怎么学过 Android 开发，主要功能代码均由上游分支 [KaguraRinko/StatusBarLyricExt](https://github.com/KaguraRinko/StatusBarLyricExt) 提供，十分感谢。
 

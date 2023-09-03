@@ -3,12 +3,10 @@ package statusbar.finder;
 import android.content.Context;
 import android.media.MediaMetadata;
 
-import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
