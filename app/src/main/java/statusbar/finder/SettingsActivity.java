@@ -123,6 +123,7 @@ public class SettingsActivity extends FragmentActivity {
                 Toast.makeText(requireContext(), R.string.toast_get_notification_permission, Toast.LENGTH_LONG).show();
                 enableNotification(requireContext());
             }
+            manager.cancelAll();
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
 //            try {

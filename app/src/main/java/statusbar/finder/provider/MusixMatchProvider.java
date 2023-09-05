@@ -1,7 +1,6 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +11,6 @@ import java.net.URLEncoder;
 
 import statusbar.finder.provider.utils.HttpRequestUtil;
 
-// 试做
 public class MusixMatchProvider implements ILrcProvider {
 
     private static final String MUSIXMATCH_BASE_URL = "https://apic.musixmatch.com/ws/1.1/";
@@ -25,14 +23,8 @@ public class MusixMatchProvider implements ILrcProvider {
         JSONObject lrcFullJson;
         String lrcUrl;
         if (MUSIXMATCH_USERTOKEN  == null) {
-            try{
-                // Form Google
-                JSONObject tokenJson;
-                String tokenURL = String.format(MUSIXMATCH_TOKEN_URL_FORMAT, "");
-                tokenJson = HttpRequestUtil.getJsonResponse(tokenURL);
-                MUSIXMATCH_USERTOKEN = tokenJson.getJSONObject("message").getJSONObject("body").getString("user_token");
-            } catch (JSONException e) {
-                e.printStackTrace();
+            MUSIXMATCH_USERTOKEN = getMusixMatchUserToken("");
+            if (MUSIXMATCH_USERTOKEN  == null) {
                 return null;
             }
         }
@@ -62,6 +54,21 @@ public class MusixMatchProvider implements ILrcProvider {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
+        String result;
+        try{
+            // Form Google
+            JSONObject tokenJson;
+            String tokenURL = String.format(MUSIXMATCH_TOKEN_URL_FORMAT, guid);
+            tokenJson = HttpRequestUtil.getJsonResponse(tokenURL);
+            result = tokenJson.getJSONObject("message").getJSONObject("body").getString("user_token");
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return result;
     }
 
 }

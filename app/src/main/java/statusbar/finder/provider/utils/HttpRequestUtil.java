@@ -51,7 +51,7 @@ public class HttpRequestUtil {
             in.close();
             connection.disconnect();
             return jsonObject;
-        } else if (connection.getResponseCode() == 301 || connection.getResponseCode() == 302) {
+        } else if (connection.getResponseCode() == 301 || connection.getResponseCode() == 302) { // 处理重定向
             URL movedHttpUrl = new URL(connection.getHeaderField("Location"));
             HttpURLConnection movedConnection = (HttpURLConnection) movedHttpUrl.openConnection();
             movedConnection.setRequestMethod("GET");

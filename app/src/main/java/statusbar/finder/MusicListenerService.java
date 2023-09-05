@@ -19,6 +19,8 @@ import android.os.Message;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.Log;
+
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
 import androidx.annotation.Nullable;
@@ -35,6 +37,7 @@ import cn.lyric.getter.api.tools.Tools;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.misc.Constants;
+import statusbar.finder.misc.checkStringLang;
 
 import cn.lyric.getter.api.tools.EventTools;
 
@@ -57,6 +60,7 @@ public class MusicListenerService extends NotificationListenerService {
     private long mLastSentenceFromTime = -1;
 
     private String systemLanguage;
+    private String drawBase64;
 
     private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -184,6 +188,7 @@ public class MusicListenerService extends NotificationListenerService {
     public void onListenerConnected() {
         super.onListenerConnected();
         systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+        drawBase64 = Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground));
         // Log.d("systemLanguage", systemLanguage);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -256,19 +261,22 @@ public class MusicListenerService extends NotificationListenerService {
         Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
-            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 1; // 偏移一秒
-            if (delay < 1){delay = 1;}
+            assert nextSentence != null;
+            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 3;
+            if (delay < 0){delay = 0;}
+            Log.d("delayDisp", Objects.toString(delay));
+            // delay = 0;
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
             // Translate For zh
-            if(Objects.equals(systemLanguage, "zh-CN") && !ZhConverterUtil.isSimple(sentence.content)){
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toSimple(sentence.content), true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
-            } else if (Objects.equals(systemLanguage, "zh-TW") && !ZhConverterUtil.isTraditional(sentence.content)) {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toTraditional(sentence.content), true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
+            if(Objects.equals(systemLanguage, "zh-CN") && !ZhConverterUtil.isSimple(sentence.content) && !checkStringLang.isJapenese(sentence.content)){
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toSimple(sentence.content), true, drawBase64, false, "", getPackageName(), delay);
+            } else if (Objects.equals(systemLanguage, "zh-TW") && !ZhConverterUtil.isTraditional(sentence.content) && !checkStringLang.isJapenese(sentence.content)) {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toTraditional(sentence.content), true, drawBase64, false, "", getPackageName(), delay);
             } else {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)), false, "", getPackageName(), delay);
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, drawBase64, false, "", getPackageName(), delay);
             }
             // Log.d("mLyric", mLyric.toString());
         }
