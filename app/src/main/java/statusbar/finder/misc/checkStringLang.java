@@ -1,7 +1,5 @@
 package statusbar.finder.misc;
 
-import static java.nio.file.Files.find;
-
 import java.util.regex.*;
 public class checkStringLang {
 
