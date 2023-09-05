@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
@@ -59,9 +60,9 @@ public class LrcGetter {
         }
         if (currentResult != null && LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
             String allLyrics = currentResult.getAllLyrics(false);
-            if (sysLang == "zh-CN" && !checkStringLang.isJapanese(allLyrics)) {
+            if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
                 currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
-            } else if (sysLang == "zh-TW" && !checkStringLang.isJapanese(allLyrics)) {
+            } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
                 currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
             }
             try {

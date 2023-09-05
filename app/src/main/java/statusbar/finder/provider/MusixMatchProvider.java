@@ -2,6 +2,8 @@ package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
 
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.NullPointerException;
 import java.net.URLEncoder;
 
+import statusbar.finder.misc.checkStringLang;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 
 public class MusixMatchProvider implements ILrcProvider {
@@ -30,15 +33,15 @@ public class MusixMatchProvider implements ILrcProvider {
             }
         }
         try{
-            String track = URLEncoder.encode(data.getString(MediaMetadata.METADATA_KEY_TITLE), "UTF-8");
-            String artist = URLEncoder.encode(data.getString(MediaMetadata.METADATA_KEY_ARTIST), "UTF-8");
-            String album = URLEncoder.encode(data.getString(MediaMetadata.METADATA_KEY_ALBUM), "UTF-8");
+            String track = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_TITLE));
+            String artist = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ARTIST));
+            String album = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ALBUM));
             lrcUrl = String.format(MUSIXMATCH_LRC_URL_FORMAT,
                     MUSIXMATCH_USERTOKEN,
                     track,
                     artist,
                     album);
-        }catch (UnsupportedEncodingException | NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
             return null;
         }
@@ -55,6 +58,19 @@ public class MusixMatchProvider implements ILrcProvider {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private String toSimpleURLEncode(String input) {
+        String result = input;
+        if (!checkStringLang.isJapanese(input)) {
+            result = ZhConverterUtil.toSimple(result);
+        }
+        try {
+            URLEncoder.encode(result, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+           return null;
+        }
+        return result;
     }
 
     private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
