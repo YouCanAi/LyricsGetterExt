@@ -3,12 +3,15 @@ package statusbar.finder.provider;
 import android.media.MediaMetadata;
 import android.util.Pair;
 
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Objects;
 
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
@@ -51,6 +54,10 @@ public class NeteaseProvider implements ILrcProvider {
             String soundName = jsonObject.getString("name");
             String albumName = jsonObject.getJSONObject("album").getString("name");
             JSONArray artists = jsonObject.getJSONArray("artists");
+            if (!Objects.equals(artists.getJSONObject(0).getString("name"), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)) &&
+                    !Objects.equals(artists.getJSONObject(0).getString("name"), ZhConverterUtil.toSimple(mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)))){
+                continue;
+            }
             long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, LyricSearchUtil.parseArtists(artists, "name"), albumName);
             if (dis < minDistance) {
                 minDistance = dis;

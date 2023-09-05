@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
@@ -35,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -184,15 +186,14 @@ public class PackageListPreference extends PreferenceCategory implements
             dialog.show();
 
         } else if (preference == mAddRuleIgnorePref) {
-            mAddRuleIgnorePref.setEnabled(false);
             executorService.execute(() -> {
                 try {
                     addIgnorePackagesFormRules();
                 } catch (Exception e) {
+                    Toast.makeText(getContext(), R.string.toast_cannot_get_rules, Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
             });
-            mAddRuleIgnorePref.setEnabled(true);
         } else if (preference == findPreference(preference.getKey())) {
             builder.setTitle(R.string.dialog_delete_title)
                 .setMessage(R.string.dialog_delete_message)
@@ -206,7 +207,6 @@ public class PackageListPreference extends PreferenceCategory implements
         return true;
     }
     public void addIgnorePackagesFormRules() throws IOException{
-
         try {
             JSONObject jsonObject = HttpRequestUtil.getJsonResponse(RULES_FULL_URL);
                     if (jsonObject != null) {
@@ -222,9 +222,8 @@ public class PackageListPreference extends PreferenceCategory implements
                     }
                     savePackagesList();
             }
-        } catch (JSONException e) {
+        } catch (JSONException | ConnectException e) {
             e.printStackTrace();
         }
-
     }
 }

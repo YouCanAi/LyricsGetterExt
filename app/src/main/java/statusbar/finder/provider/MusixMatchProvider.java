@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.NullPointerException;
 import java.net.URLEncoder;
 
 import statusbar.finder.provider.utils.HttpRequestUtil;
@@ -37,7 +38,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     track,
                     artist,
                     album);
-        }catch (UnsupportedEncodingException | java.lang.NullPointerException e){
+        }catch (UnsupportedEncodingException | NullPointerException e){
             e.printStackTrace();
             return null;
         }

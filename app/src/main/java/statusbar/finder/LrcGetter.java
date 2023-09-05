@@ -14,6 +14,9 @@ import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.provider.*;
 import statusbar.finder.provider.utils.LyricSearchUtil;
+import statusbar.finder.misc.checkStringLang;
+
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
 public class LrcGetter {
 
@@ -27,7 +30,7 @@ public class LrcGetter {
     private static MessageDigest messageDigest;
     private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
 
-    public static Lyric getLyric(Context context, MediaMetadata mediaMetadata) {
+    public static Lyric getLyric(Context context, MediaMetadata mediaMetadata, String sysLang) {
         if (messageDigest == null) {
             try {
                 messageDigest =  MessageDigest.getInstance("SHA");
@@ -55,6 +58,12 @@ public class LrcGetter {
             }
         }
         if (currentResult != null && LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
+            String allLyrics = currentResult.getAllLyrics(false);
+            if (sysLang == "zh-CN" && !checkStringLang.isJapanese(allLyrics)) {
+                currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
+            } else if (sysLang == "zh-TW" && !checkStringLang.isJapanese(allLyrics)) {
+                currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
+            }
             try {
                 FileOutputStream lrcOut = new FileOutputStream(requireLrcPath);
                 lrcOut.write(currentResult.mLyric.getBytes());

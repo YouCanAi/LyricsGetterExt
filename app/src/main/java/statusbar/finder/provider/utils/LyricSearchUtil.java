@@ -25,15 +25,15 @@ public class LyricSearchUtil {
         String ret;
 
         if (ZhConverterUtil.isTraditional(title)) {
-            if (!(checkStringLang.isJapenese(title)))
+            if (!(checkStringLang.isJapanese(title)))
                 title = ZhConverterUtil.toSimple(title);
         }
         if (ZhConverterUtil.isTraditional(artist)) {
-            if (!(checkStringLang.isJapenese(artist)))
+            if (!(checkStringLang.isJapanese(artist)))
                 artist = ZhConverterUtil.toSimple(artist);
         }
         if (ZhConverterUtil.isTraditional(album)) {
-            if (!(checkStringLang.isJapenese(album)))
+            if (!(checkStringLang.isJapanese(album)))
                 album = ZhConverterUtil.toSimple(album);
         }
 
@@ -71,15 +71,15 @@ public class LyricSearchUtil {
         String realAlbum = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
 
         if (ZhConverterUtil.isTraditional(realTitle)) {
-            if (!(checkStringLang.isJapenese(realTitle)))
+            if (!(checkStringLang.isJapanese(realTitle)))
                 realTitle = ZhConverterUtil.toSimple(realTitle);
         }
         if (ZhConverterUtil.isTraditional(realArtist)) {
-            if (!(checkStringLang.isJapenese(realArtist)))
+            if (!(checkStringLang.isJapanese(realArtist)))
                 realArtist = ZhConverterUtil.toSimple(realArtist);
         }
         if (ZhConverterUtil.isTraditional(realAlbum)) {
-            if (!(checkStringLang.isJapenese(realAlbum)))
+            if (!(checkStringLang.isJapanese(realAlbum)))
                 realAlbum = ZhConverterUtil.toSimple(realAlbum);
         }
 

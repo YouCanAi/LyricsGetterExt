@@ -21,7 +21,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -37,7 +36,6 @@ import cn.lyric.getter.api.tools.Tools;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.misc.Constants;
-import statusbar.finder.misc.checkStringLang;
 
 import cn.lyric.getter.api.tools.EventTools;
 
@@ -59,7 +57,7 @@ public class MusicListenerService extends NotificationListenerService {
     private Notification mLyricNotification;
     private long mLastSentenceFromTime = -1;
 
-    private String systemLanguage;
+    private static String systemLanguage;
     private String drawBase64;
 
     private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
@@ -271,13 +269,7 @@ public class MusicListenerService extends NotificationListenerService {
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
             // Translate For zh
-            if(Objects.equals(systemLanguage, "zh-CN") && !ZhConverterUtil.isSimple(sentence.content) && !checkStringLang.isJapenese(sentence.content)){
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toSimple(sentence.content), true, drawBase64, false, "", getPackageName(), delay);
-            } else if (Objects.equals(systemLanguage, "zh-TW") && !ZhConverterUtil.isTraditional(sentence.content) && !checkStringLang.isJapenese(sentence.content)) {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), ZhConverterUtil.toTraditional(sentence.content), true, drawBase64, false, "", getPackageName(), delay);
-            } else {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, drawBase64, false, "", getPackageName(), delay);
-            }
+            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, drawBase64, false, "", getPackageName(), delay);
             // Log.d("mLyric", mLyric.toString());
         }
     }
@@ -297,7 +289,7 @@ public class MusicListenerService extends NotificationListenerService {
         @Override
         public void run() {
             if (handler == null) return;
-            Lyric lrc = LrcGetter.getLyric(context, data);
+            Lyric lrc = LrcGetter.getLyric(context, data, systemLanguage);
             Message message = new Message();
             message.what = MSG_LYRIC_UPDATE_DONE;
             message.obj = lrc;
