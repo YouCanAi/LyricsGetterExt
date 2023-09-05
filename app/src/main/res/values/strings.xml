@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LyricGetterExt</string>
+    <string name="app_name">Lyrics Getter Ext</string>
 
     <string name="profile_choose_app">Choose app</string>
     <string name="dialog_delete_title">Delete</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LyricGetter 擴充</string>
+    <string name="app_name">Lyrics Getter 擴充</string>
     <string name="about_header">關於</string>
     <string name="preferences_header">設定</string>
     <string name="profile_choose_app">選擇應用程式</string>
