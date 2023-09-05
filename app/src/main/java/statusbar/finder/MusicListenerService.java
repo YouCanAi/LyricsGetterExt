@@ -186,7 +186,7 @@ public class MusicListenerService extends NotificationListenerService {
     public void onListenerConnected() {
         super.onListenerConnected();
         systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
-        drawBase64 = Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground));
+        drawBase64 = Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_statusbar_icon));
         // Log.d("systemLanguage", systemLanguage);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -262,14 +262,12 @@ public class MusicListenerService extends NotificationListenerService {
             assert nextSentence != null;
             delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 3;
             if (delay < 0){delay = 0;}
-            Log.d("delayDisp", Objects.toString(delay));
-            // delay = 0;
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
             // Translate For zh
-            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content, true, drawBase64, false, "", getPackageName(), delay);
+            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
             // Log.d("mLyric", mLyric.toString());
         }
     }
