@@ -8,9 +8,9 @@
     <string name="dialog_delete_message">移除所選項目？</string>
     <string name="add_package_to_title">增加應用程式</string>
     <string name="enabled_title">開啟</string>
-    <string name="lyricsGetterStatus_title">LyricsGetter 連接狀態</string>
+    <string name="lyricsGetterStatus_title">Lyrics Getter 連接狀態</string>
     <string name="ignored_apps_title">忽略應用程式</string>
-    <string name="ignored_rules_title">匯入忽略應用規則</string>
+    <string name="ignored_rules_title">匯入忽略應用程式規則</string>
     <string name="ignored_rules_summary">從 Lyrics Getter 匯入 Hook 規則，並將規則內的應用程式進行忽略，避免重複輸出歌詞。</string>
     <string name="unsupport_rom_summary">不支援目前 ROM</string>
     <string name="unsupport_rom_title">不支援</string>

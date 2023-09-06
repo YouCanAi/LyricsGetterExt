@@ -56,7 +56,7 @@ public class NeteaseProvider implements ILrcProvider {
             JSONArray artists = jsonObject.getJSONArray("artists");
             if (mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST).contains(artists.getJSONObject(0).getString("name"))
             || ZhConverterUtil.toSimple(mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)).contains(artists.getJSONObject(0).getString("name"))){
-                continue;
+                continue; // 由于网易云收录翻唱过多，容易造成词库混乱，所以添加一次 Artist 检测
             }
             long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, LyricSearchUtil.parseArtists(artists, "name"), albumName);
             if (dis < minDistance) {
