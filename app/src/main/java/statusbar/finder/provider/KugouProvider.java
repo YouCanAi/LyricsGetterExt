@@ -50,7 +50,7 @@ public class KugouProvider implements ILrcProvider {
         long currentId = -1;
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String soundName = jsonObject.getString("soundname");
+            String soundName = jsonObject.getString("song");
             String artist = jsonObject.getString("singer");
             long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, artist, null);
             if (dis < minDistance) {

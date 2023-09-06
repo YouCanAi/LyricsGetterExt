@@ -266,7 +266,6 @@ public class MusicListenerService extends NotificationListenerService {
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            // Translate For zh
             EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
             // Log.d("mLyric", mLyric.toString());
         }

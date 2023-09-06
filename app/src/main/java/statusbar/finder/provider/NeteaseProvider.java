@@ -54,8 +54,8 @@ public class NeteaseProvider implements ILrcProvider {
             String soundName = jsonObject.getString("name");
             String albumName = jsonObject.getJSONObject("album").getString("name");
             JSONArray artists = jsonObject.getJSONArray("artists");
-            if (!Objects.equals(artists.getJSONObject(0).getString("name"), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)) &&
-                    !Objects.equals(artists.getJSONObject(0).getString("name"), ZhConverterUtil.toSimple(mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)))){
+            if (mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST).contains(artists.getJSONObject(0).getString("name"))
+            || ZhConverterUtil.toSimple(mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST)).contains(artists.getJSONObject(0).getString("name"))){
                 continue;
             }
             long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, LyricSearchUtil.parseArtists(artists, "name"), albumName);
