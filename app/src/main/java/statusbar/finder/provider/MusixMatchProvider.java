@@ -42,12 +42,16 @@ public class MusixMatchProvider implements ILrcProvider {
             if (searchResult != null && searchResult.getJSONObject("message").getJSONObject("header").getLong("status_code") == 200) {
                 JSONArray array = searchResult.getJSONObject("message").getJSONObject("body").getJSONObject("macro_result_list").getJSONArray("track_list");
                 Pair<String, Long> pair = getLrcUrl(array, data);
-                JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
-                LyricResult result = new LyricResult();
-                result.mLyric = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle").getString("subtitle_body");
-                result.mDistance = pair.second;
-                result.source = "MusixMatch";
-                return result;
+                if (pair != null) {
+                    JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
+                    LyricResult result = new LyricResult();
+                    result.mLyric = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle").getString("subtitle_body");
+                    result.mDistance = pair.second;
+                    result.source = "MusixMatch";
+                    return result;
+                } else {
+                    return null;
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -70,6 +74,7 @@ public class MusixMatchProvider implements ILrcProvider {
                 currentID = jsonObject.getLong("track_id");
             }
         }
+        if (currentID == -1) {return null;}
         return new Pair<>(String.format(Locale.getDefault(), MUSIXMATCH_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, currentID), minDistance);
     }
 

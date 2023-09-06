@@ -30,12 +30,16 @@ public class QQMusicProvider implements ILrcProvider {
             if (searchResult != null && searchResult.getLong("code") == 0) {
                 JSONArray array = searchResult.getJSONObject("data").getJSONObject("song").getJSONArray("list");
                 Pair<String, Long> pair = getLrcUrl(array, data);
-                JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first, QM_REFERER);
-                LyricResult result = new LyricResult();
-                result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
-                result.mDistance = pair.second;
-                result.source = "QQ";
-                return result;
+                if (pair != null) {
+                    JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first, QM_REFERER);
+                    LyricResult result = new LyricResult();
+                    result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
+                    result.mDistance = pair.second;
+                    result.source = "QQ";
+                    return result;
+                } else {
+                    return null;
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -58,6 +62,7 @@ public class QQMusicProvider implements ILrcProvider {
                 currentMID = jsonObject.getString("songmid");
             }
         }
+        if (currentMID.equals("")) {return null;}
         return new Pair<>(String.format(Locale.getDefault(), QM_LRC_URL_FORMAT, currentMID), minDistance);
     }
 }

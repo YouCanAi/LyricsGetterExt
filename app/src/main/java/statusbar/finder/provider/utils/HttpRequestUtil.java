@@ -34,8 +34,8 @@ public class HttpRequestUtil {
         if (!TextUtils.isEmpty(referer)) {
             connection.setRequestProperty("Referer", referer);
         }
-        connection.setConnectTimeout(2500);
-        connection.setReadTimeout(2500);
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
         connection.connect();
         if (connection.getResponseCode() == 200) {
             // 处理搜索结果

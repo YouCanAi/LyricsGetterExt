@@ -32,12 +32,16 @@ public class NeteaseProvider implements ILrcProvider {
             if (searchResult != null && searchResult.getLong("code") == 200) {
                 JSONArray array = searchResult.getJSONObject("result").getJSONArray("songs");
                 Pair<String, Long> pair = getLrcUrl(array, data);
-                JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
-                LyricResult result = new LyricResult();
-                result.mLyric = lrcJson.getJSONObject("lrc").getString("lyric");
-                result.mDistance = pair.second;
-                result.source = "Netease";
-                return result;
+                if (pair != null) {
+                    JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
+                    LyricResult result = new LyricResult();
+                    result.mLyric = lrcJson.getJSONObject("lrc").getString("lyric");
+                    result.mDistance = pair.second;
+                    result.source = "Netease";
+                    return result;
+                } else {
+                    return null;
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -64,6 +68,7 @@ public class NeteaseProvider implements ILrcProvider {
                 currentID = jsonObject.getLong("id");
             }
         }
+        if (currentID == -1) {return null;}
         return new Pair<>(String.format(Locale.getDefault(), NETEASE_LRC_URL_FORMAT, currentID), minDistance);
     }
 }
