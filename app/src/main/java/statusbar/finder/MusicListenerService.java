@@ -115,6 +115,7 @@ public class MusicListenerService extends NotificationListenerService {
 
         @Override
         public void onMetadataChanged(@Nullable MediaMetadata metadata) {
+            stopLyric();
             mLyric = null;
             if (metadata == null) return;
             requiredLrcTitle = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
@@ -168,7 +169,7 @@ public class MusicListenerService extends NotificationListenerService {
 //                                getApplicationContext(),
 //                                title + " : " + text,
 //                                true,
-//                                Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_launcher_foreground)),
+//                                Tools.INSTANCE.drawableToBase64(drawBase64),
 //                                false,
 //                                "",
 //                                getPackageName(), 1

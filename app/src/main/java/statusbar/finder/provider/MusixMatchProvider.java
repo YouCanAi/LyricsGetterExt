@@ -23,9 +23,9 @@ public class MusixMatchProvider implements ILrcProvider {
 
     private static final String MUSIXMATCH_BASE_URL = "https://apic.musixmatch.com/ws/1.1/";
     private static final String MUSIXMATCH_TOKEN_URL_FORMAT = MUSIXMATCH_BASE_URL + "token.get?guid=%s&app_id=android-player-v1.0&format=json";
-    // private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&track_id=%s&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.search?app_id=android-player-v1.0&usertoken=%s&q=%s";
+    private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
     private static String MUSIXMATCH_USERTOKEN;
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
@@ -50,7 +50,33 @@ public class MusixMatchProvider implements ILrcProvider {
                     result.source = "MusixMatch";
                     return result;
                 } else {
-                    return null;
+                    // 无法通过 id 寻找到歌词时
+                    // 则尝试使用直接搜索歌词的方法
+                    String lrcUrl;
+                    String track = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_TITLE));
+                    String artist = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ARTIST));
+                    String album = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ALBUM));
+                    lrcUrl = String.format(MUSIXMATCH_LRC_SERACH_URL_FORMAT,
+                            MUSIXMATCH_USERTOKEN,
+                            track,
+                            artist,
+                            album);
+                    try {
+                        JSONObject lrcJson = HttpRequestUtil.getJsonResponse(lrcUrl);
+                        LyricResult result = new LyricResult();
+                        JSONObject subTitleJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle");
+                        JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
+                        result.mLyric = subTitleJson.getString("subtitle_body");
+                        String soundName = infoJson.getString("track_name");
+                        String albumName = infoJson.getString("album_name");
+                        String artistName = infoJson.getString("artist_name");
+                        result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
+                        result.source = "MusixMatch";
+                        return result;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -67,8 +93,8 @@ public class MusixMatchProvider implements ILrcProvider {
             JSONObject jsonObject = jsonArray.getJSONObject(i).getJSONObject("track");
             String soundName = jsonObject.getString("track_name");
             String albumName = jsonObject.getString("album_name");
-            String artists = jsonObject.getString("artist_name");
-            long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, artists, albumName);
+            String artistName = jsonObject.getString("artist_name");
+            long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, artistName, albumName);
             if (dis < minDistance) {
                 minDistance = dis;
                 currentID = jsonObject.getLong("track_id");

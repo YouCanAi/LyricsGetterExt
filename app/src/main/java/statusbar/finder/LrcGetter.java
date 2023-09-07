@@ -23,9 +23,9 @@ public class LrcGetter {
 
     private static final ILrcProvider[] providers = {
             new MusixMatchProvider(),
-            new KugouProvider(),
-            new QQMusicProvider(),
             new NeteaseProvider(),
+            new KugouProvider(),
+            // new QQMusicProvider(), Can't working.
     };
 
     private static MessageDigest messageDigest;

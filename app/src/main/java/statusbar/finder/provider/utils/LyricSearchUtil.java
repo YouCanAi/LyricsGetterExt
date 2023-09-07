@@ -44,9 +44,13 @@ public class LyricSearchUtil {
         } else {
             ret = title;
         }
-        try {
-            return URLEncoder.encode(ret, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        if (!TextUtils.isEmpty(ret)) {
+            try {
+                return URLEncoder.encode(ret, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                return ret;
+            }
+        } else {
             return ret;
         }
     }
