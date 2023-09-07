@@ -23,6 +23,9 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Run Lint
+      run: ./gradlew lintRelease
+
     - name: Build with Gradle
       run: |
         ./gradlew assemble
@@ -33,3 +36,9 @@ jobs:
       with:
         name: debug
         path: ./app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Upload lint-baseline.xml
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug
+        path: ./app/lint-baseline.xml
