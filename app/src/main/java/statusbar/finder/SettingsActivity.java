@@ -1,5 +1,7 @@
 package statusbar.finder;
 
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -9,6 +11,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -78,6 +81,25 @@ public class SettingsActivity extends FragmentActivity {
         }
     }
 
+    private static boolean isIgnoringBatteryOptimizations(Context context) {
+        boolean isIgnoring = false;
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if (powerManager != null) {
+            isIgnoring = powerManager.isIgnoringBatteryOptimizations(context.getPackageName());
+        }
+        return isIgnoring;
+    }
+
+    public static void requestIgnoreBatteryOptimizations(Context context) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private static boolean isNotificationListenerEnabled(Context context) {
         if (context == null) return false;
         String pkgName = context.getPackageName();
@@ -122,6 +144,9 @@ public class SettingsActivity extends FragmentActivity {
             if (!manager.areNotificationsEnabled()) {
                 Toast.makeText(requireContext(), R.string.toast_get_notification_permission, Toast.LENGTH_LONG).show();
                 enableNotification(requireContext());
+            }
+            if (!isIgnoringBatteryOptimizations(requireContext())){
+                requestIgnoreBatteryOptimizations(requireContext());
             }
             manager.cancelAll();
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
