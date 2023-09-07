@@ -17,6 +17,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="wrap_content"
     android:layout_width="match_parent">
 
@@ -38,12 +39,12 @@
         android:id="@+id/restricted_icon"
         android:layout_width="@dimen/settingslib_restricted_icon_size"
         android:layout_height="@dimen/settingslib_restricted_icon_size"
-        android:tint="?android:attr/colorAccent"
         android:theme="@android:style/Theme.Material"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
         android:src="@android:drawable/ic_info"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:tint="?android:attr/colorAccent" />
 
     <Switch
         android:id="@android:id/switch_widget"
