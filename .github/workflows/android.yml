@@ -26,6 +26,12 @@ jobs:
     - name: Run Lint
       run: ./gradlew lintRelease
 
+    - name: Upload lint-baseline.xml
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-baseline.xml
+        path: ./app/lint-baseline.xml
+
     - name: Build with Gradle
       run: |
         ./gradlew assemble
@@ -34,11 +40,5 @@ jobs:
     - name: Upload Debug APK
       uses: actions/upload-artifact@v3
       with:
-        name: debug
+        name: app-debug.apk
         path: ./app/build/outputs/apk/debug/app-debug.apk
-
-    - name: Upload lint-baseline.xml
-      uses: actions/upload-artifact@v3
-      with:
-        name: debug
-        path: ./app/lint-baseline.xml
