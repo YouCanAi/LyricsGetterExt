@@ -267,7 +267,7 @@ public class MusicListenerService extends NotificationListenerService {
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
+            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\ntest", true, drawBase64, false, "", getPackageName(), delay);
             // Log.d("mLyric", mLyric.toString());
         }
     }
