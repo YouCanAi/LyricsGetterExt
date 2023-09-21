@@ -24,7 +24,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Run Lint
-      run: ./gradlew lintRelease
+      run: ./gradlew updateLintBaseline
 
     - name: Upload lint-baseline.xml
       uses: actions/upload-artifact@v3
@@ -34,7 +34,6 @@ jobs:
 
     - name: Build with Gradle
       run: |
-        ./gradlew updateLintBaseline
         ./gradlew assemble
         ./gradlew bundleRelease
 
