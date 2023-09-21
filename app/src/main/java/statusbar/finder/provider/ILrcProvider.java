@@ -11,6 +11,7 @@ public interface ILrcProvider {
 
     class LyricResult {
         public String mLyric;
+        public String mTransLyric;
         public long mDistance;
 
         public String source = "Local";

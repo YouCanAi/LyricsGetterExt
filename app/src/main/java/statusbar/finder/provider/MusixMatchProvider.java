@@ -27,6 +27,7 @@ public class MusixMatchProvider implements ILrcProvider {
     private static final String MUSIXMATCH_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.search?app_id=android-player-v1.0&usertoken=%s&q=%s";
     private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
     private static String MUSIXMATCH_USERTOKEN;
+    
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
         if (MUSIXMATCH_USERTOKEN  == null) {
@@ -106,6 +107,9 @@ public class MusixMatchProvider implements ILrcProvider {
 
     private String toSimpleURLEncode(String input) {
         String result = input;
+        if (input == null) {
+            return null;
+        }
         if (!checkStringLang.isJapanese(input)) {
             result = ZhConverterUtil.toSimple(result);
         }
