@@ -90,8 +90,8 @@ public class LyricSearchUtil {
         if (!realTitle.contains(title) && !title.contains(realTitle) || TextUtils.isEmpty(title)) {
             return 10000;
         }
-        long res = levenshtein(title, realTitle) * 100;
-        res += levenshtein(artist, realArtist) * 10;
+        long res = levenshtein(title, realTitle) * 100L;
+        res += levenshtein(artist, realArtist) * 10L;
         res += levenshtein(album, realAlbum);
         return res;
     }

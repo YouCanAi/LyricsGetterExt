@@ -119,7 +119,10 @@ public class MusicListenerService extends NotificationListenerService {
             mLyric = null;
             if (metadata == null) return;
             requiredLrcTitle = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-            new LrcUpdateThread(getApplicationContext(), mHandler, metadata).start();
+            if (!Constants.isLrcUpdateThreadRunning) {
+                Constants.isLrcUpdateThreadRunning = true;
+                new LrcUpdateThread(getApplicationContext(), mHandler, metadata).start();
+            }
         }
     };
 
@@ -267,7 +270,7 @@ public class MusicListenerService extends NotificationListenerService {
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\ntest", true, drawBase64, false, "", getPackageName(), delay);
+            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n\r" + "", true, drawBase64, false, "", getPackageName(), delay);
             // Log.d("mLyric", mLyric.toString());
         }
     }
@@ -295,6 +298,7 @@ public class MusicListenerService extends NotificationListenerService {
             bundle.putString("title", data.getString(MediaMetadata.METADATA_KEY_TITLE));
             message.setData(bundle);
             handler.sendMessage(message);
+            Constants.isLrcUpdateThreadRunning = false;
         }
     }
 

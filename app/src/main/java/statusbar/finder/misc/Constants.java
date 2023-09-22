@@ -17,4 +17,6 @@ public class Constants {
 
     public static final String SETTINGS_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
+    public static boolean isLrcUpdateThreadRunning = false;
+    public static boolean isTransCheck = false;
 }

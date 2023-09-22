@@ -11,10 +11,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.NullPointerException;
 import java.net.URLEncoder;
 import java.util.Locale;
 
+import cn.zhaiyifan.lyric.LyricUtils;
 import statusbar.finder.misc.checkStringLang;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
@@ -26,6 +26,7 @@ public class MusixMatchProvider implements ILrcProvider {
     private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&track_id=%s&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.search?app_id=android-player-v1.0&usertoken=%s&q=%s";
     private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
+    private static final String MUSIXMATCH_TRANS_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=zh&track_id=%s&comment_format=text&part=user&commontrack_id=%s&format=json&app_id=android-player-v1.0&tags=playing";
     private static String MUSIXMATCH_USERTOKEN;
     
     @Override
@@ -107,19 +108,24 @@ public class MusixMatchProvider implements ILrcProvider {
 
     private String toSimpleURLEncode(String input) {
         String result = input;
-        if (input == null) {
+        if (input != null) {
+            if (!checkStringLang.isJapanese(input)) {
+                result = ZhConverterUtil.toSimple(result);
+            }
+            try {
+                URLEncoder.encode(result, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                return null;
+            }
+            return result;
+        } else {
             return null;
         }
-        if (!checkStringLang.isJapanese(input)) {
-            result = ZhConverterUtil.toSimple(result);
-        }
-        try {
-            URLEncoder.encode(result, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-           return null;
-        }
-        return result;
     }
+
+//    private String getTransLyric(LyricResult lyricResult, long track_id, long commontrack_id) {
+//
+//    }
 
     private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
         String result;

@@ -36,6 +36,11 @@ public class NeteaseProvider implements ILrcProvider {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     LyricResult result = new LyricResult();
                     result.mLyric = lrcJson.getJSONObject("lrc").getString("lyric");
+                    try {
+                        result.mTransLyric = lrcJson.getJSONObject("tlyric").getString("lyric");
+                    } catch (JSONException e) {
+                        result.mTransLyric = null;
+                    }
                     result.mDistance = pair.second;
                     result.source = "Netease";
                     return result;

@@ -135,6 +135,7 @@ public class SettingsActivity extends FragmentActivity {
             implements Preference.OnPreferenceClickListener {
 
         private SwitchPreference mEnabledPreference;
+        private SwitchPreference mTrans;
         private Preference mConnectionStatusPreference;
 
         @Override
@@ -151,6 +152,7 @@ public class SettingsActivity extends FragmentActivity {
             manager.cancelAll();
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
+            mTrans = findPreference("trans");
 //            try {
 //                mNotificationFields[0] =
 //                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
@@ -173,6 +175,9 @@ public class SettingsActivity extends FragmentActivity {
                     mEnabledPreference.setChecked(false);
                 }
                 mEnabledPreference.setOnPreferenceClickListener(this);
+            }
+            if (mTrans != null) {
+                mTrans.setOnPreferenceClickListener(this);
             }
             Preference appInfoPreference = findPreference("app");
             if (appInfoPreference != null) {
@@ -210,6 +215,8 @@ public class SettingsActivity extends FragmentActivity {
                 }
                 // 启动活动
                 return true;
+            } else if (preference == mTrans) {
+                Constants.isTransCheck = mTrans.isChecked();
             } else {
                 String url = mUrlMap.get(preference.getKey());
                 if (TextUtils.isEmpty(url)) return false;
