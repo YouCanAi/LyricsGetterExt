@@ -43,9 +43,12 @@ public class LrcGetter {
         File cachePath = context.getCacheDir();
         String meta = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) + "," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) + "," +
                 mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM) + ", " + mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        String transMeta = "Trans," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) + "," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) + "," +
+                mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM) + ", " + mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         File requireLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(meta.getBytes())) + ".lrc");
+        File requireTransLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(transMeta.getBytes())) + ".lrc");
         if (requireLrcPath.exists()) {
-            return LyricUtils.parseLyric(requireLrcPath, "UTF-8");
+            return LyricUtils.parseLyric(requireLrcPath, requireTransLrcPath,"UTF-8");
         }
         ILrcProvider.LyricResult currentResult = null;
         for (ILrcProvider provider : providers) {
@@ -69,10 +72,20 @@ public class LrcGetter {
                 FileOutputStream lrcOut = new FileOutputStream(requireLrcPath);
                 lrcOut.write(currentResult.mLyric.getBytes());
                 lrcOut.close();
-                return LyricUtils.parseLyric(requireLrcPath, "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            if (currentResult.mTransLyric != null) {
+                try {
+                    FileOutputStream transLrcOut = new FileOutputStream(requireTransLrcPath);
+                    transLrcOut.write(currentResult.mTransLyric.getBytes());
+                    transLrcOut.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return LyricUtils.parseLyric(requireLrcPath, requireTransLrcPath,"UTF-8");
+            }
+            return LyricUtils.parseLyric(requireLrcPath,null, "UTF-8");
         }
         return null;
     }

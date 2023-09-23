@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,10 +21,26 @@ public class LyricUtils {
     private static final String TAG = LyricUtils.class.getSimpleName();
 
 
-    public static Lyric parseLyric(InputStream inputStream, String Encoding) {
+//    public static Lyric parseLyric(InputStream inputStream, String Encoding) {
+//        Lyric lyric = new Lyric();
+//        try {
+//            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, Encoding));
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                parseLine(line, lyric);
+//            }
+//            Collections.sort(lyric.sentenceList, new Lyric.SentenceComparator());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return lyric;
+//    }
+
+    public static Lyric parseLyric(File file,File transfile, String Encoding) {
         Lyric lyric = new Lyric();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, Encoding));
+            BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(file.toPath()), Encoding));
+            Log.i(TAG, String.format("parseLyric(%s, %s)", file.getPath(), Encoding));
             String line;
             while ((line = br.readLine()) != null) {
                 parseLine(line, lyric);
@@ -32,19 +49,14 @@ public class LyricUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return lyric;
-    }
-
-    public static Lyric parseLyric(File file, String Encoding) {
-        Lyric lyric = new Lyric();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Encoding));
-            Log.i(TAG, String.format("parseLyric(%s, %s)", file.getPath(), Encoding));
+            BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(transfile.toPath()), Encoding));
+            Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
             String line;
             while ((line = br.readLine()) != null) {
                 parseLine(line, lyric);
             }
-            Collections.sort(lyric.sentenceList, new Lyric.SentenceComparator());
+            Collections.sort(lyric.transSentenceList, new Lyric.SentenceComparator());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,6 +127,45 @@ public class LyricUtils {
         if (lyric == null || ts < 0 || index < -1)
             return -1;
         List<Sentence> list = lyric.sentenceList;
+
+        if (index >= list.size())
+            index = list.size() - 1;
+        if (index == -1)
+            index = 0;
+
+        int found = -2;
+
+        if (list.get(index).fromTime + offset > ts) {
+            for (int i = index; i > -1; --i) {
+                if (list.get(i).fromTime + offset <= ts) {
+                    found = i;
+                    break;
+                }
+            }
+            // First line of lyric is bigger than starting time.
+            if (found == -2)
+                found = -1;
+        } else {
+            for (int i = index; i < list.size() - 1; ++i) {
+                //Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, list.get(i).getFromTime(), list.get(i + 1).getFromTime()));
+                if (list.get(i + 1).fromTime + offset > ts) {
+                    found = i;
+                    break;
+                }
+            }
+            // If not found, return last mLyricIndex
+            if (found == -2) {
+                found = list.size() - 1;
+            }
+        }
+
+        return found;
+    }
+
+    public static int getTransSentenceIndex(Lyric lyric, long ts, int index, int offset) {
+        if (lyric == null || ts < 0 || index < -1)
+            return -1;
+        List<Sentence> list = lyric.transSentenceList;
 
         if (index >= list.size())
             index = list.size() - 1;
@@ -284,17 +335,6 @@ public class LyricUtils {
             }
         } else {
             return Integer.MAX_VALUE;
-        }
-    }
-
-    public static Sentence getNextSentence(Lyric lyric, long ts) {
-        int found = getSentenceIndex(lyric, ts, 0, 0);
-        if (found == -1)
-            return null;
-        if (found + 1 < lyric.sentenceList.size()) {
-            return lyric.sentenceList.get(found + 1);
-        } else {
-        return lyric.sentenceList.get(found);
         }
     }
 }

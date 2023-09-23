@@ -15,6 +15,7 @@ public class Lyric {
     public int offset;
     public long length;
     public List<Sentence> sentenceList = new ArrayList<Sentence>(100);
+    public List<Sentence> transSentenceList = new ArrayList<Sentence>(100);
 
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

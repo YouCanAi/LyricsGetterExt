@@ -77,6 +77,7 @@ public class MusicListenerService extends NotificationListenerService {
             super.handleMessage(msg);
             if (msg.what == MSG_LYRIC_UPDATE_DONE && msg.getData().getString("title", "").equals(requiredLrcTitle)) {
                 mLyric = (Lyric) msg.obj;
+
                 if (mLyric == null) stopLyric();
             }
         }
@@ -260,17 +261,31 @@ public class MusicListenerService extends NotificationListenerService {
         if (mNotificationManager == null || mLyric == null) return;
         int delay;
         Lyric.Sentence sentence = LyricUtils.getSentence(mLyric, position);
-        Lyric.Sentence nextSentence = LyricUtils.getNextSentence(mLyric, position);
+        Lyric.Sentence transSentence = null;
+        int nextfound = LyricUtils.getSentenceIndex(mLyric, position,0 ,0) + 1;
+        Lyric.Sentence nextSentence = null;
+        if (nextfound < mLyric.sentenceList.size()) {
+            nextSentence = mLyric.sentenceList.get(nextfound);
+        }
+        if (mLyric.transSentenceList != null) {
+            transSentence = mLyric.transSentenceList.get(LyricUtils.getTransSentenceIndex(mLyric, position ,0,0));
+        }
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
-            assert nextSentence != null;
-            delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 3;
-            if (delay < 0){delay = 0;}
+            delay = 0;
+            if (nextSentence != null) {
+                delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 3;
+                if (delay < 0){delay = 0;}
+            }
             mLyricNotification.tickerText = sentence.content;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n\r" + "", true, drawBase64, false, "", getPackageName(), delay);
+            if (Constants.isTransCheck && transSentence != null) {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n\r" + sentence, true, drawBase64, false, "", getPackageName(), delay);
+            } else {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
+            }
             // Log.d("mLyric", mLyric.toString());
         }
     }
