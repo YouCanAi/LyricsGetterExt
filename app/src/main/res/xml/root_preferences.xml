@@ -13,7 +13,8 @@
             android:summary="false"/>
         <SwitchPreference
             android:key="trans"
-            android:title="原译双层歌词 仅限简中墨息用户" />
+            android:title="原译文双层歌词"
+            android:summary="仅供简中 墨•息 用户。"/>
         <statusbar.finder.preferences.PackageListPreference
             android:title="@string/ignored_apps_title"
             android:key="ignored_packages"

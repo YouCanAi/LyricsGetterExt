@@ -47,8 +47,10 @@ public class LrcGetter {
                 mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM) + ", " + mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         File requireLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(meta.getBytes())) + ".lrc");
         File requireTransLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(transMeta.getBytes())) + ".lrc");
-        if (requireLrcPath.exists()) {
+        if (requireLrcPath.exists() && requireTransLrcPath.exists()) {
             return LyricUtils.parseLyric(requireLrcPath, requireTransLrcPath,"UTF-8");
+        } else if (requireLrcPath.exists()) {
+            return LyricUtils.parseLyric(requireLrcPath, null,"UTF-8");
         }
         ILrcProvider.LyricResult currentResult = null;
         for (ILrcProvider provider : providers) {

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -178,6 +179,7 @@ public class SettingsActivity extends FragmentActivity {
             }
             if (mTrans != null) {
                 mTrans.setOnPreferenceClickListener(this);
+                Constants.isTransCheck = mTrans.isChecked();
             }
             Preference appInfoPreference = findPreference("app");
             if (appInfoPreference != null) {
@@ -217,6 +219,7 @@ public class SettingsActivity extends FragmentActivity {
                 return true;
             } else if (preference == mTrans) {
                 Constants.isTransCheck = mTrans.isChecked();
+                Log.d("isTransCheck", String.valueOf(Constants.isTransCheck));
             } else {
                 String url = mUrlMap.get(preference.getKey());
                 if (TextUtils.isEmpty(url)) return false;

@@ -31,10 +31,16 @@ public class Lyric {
                 stringBuilder.append(sentence.toString() + "\n");
             }
         }
+        stringBuilder.append ("---Translate---\n");
+        if (transSentenceList != null) {
+            for (Sentence sentence : transSentenceList) {
+                stringBuilder.append(sentence.toString() + "\n");
+            }
+        }
         return stringBuilder.toString();
     }
 
-    public void addSentence(String content, long time) {
+    public void addSentence(List<Sentence> sentenceList,String content, long time) {
         sentenceList.add(new Sentence(content, time));
     }
 
@@ -56,6 +62,10 @@ public class Lyric {
 
         public String toString() {
             return String.valueOf(fromTime) + ": " + content;
+        }
+
+        public long getFromTime() {
+            return this.fromTime;
         }
     }
 }

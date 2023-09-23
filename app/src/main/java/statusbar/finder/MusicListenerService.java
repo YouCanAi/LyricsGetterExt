@@ -20,6 +20,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import androidx.annotation.Nullable;
@@ -260,15 +261,16 @@ public class MusicListenerService extends NotificationListenerService {
     private void updateLyric(long position) {
         if (mNotificationManager == null || mLyric == null) return;
         int delay;
-        Lyric.Sentence sentence = LyricUtils.getSentence(mLyric, position);
+        Lyric.Sentence sentence = LyricUtils.getSentence(mLyric.sentenceList, position);
         Lyric.Sentence transSentence = null;
-        int nextfound = LyricUtils.getSentenceIndex(mLyric, position,0 ,0) + 1;
+        Log.d("mLyric.transSentenceList.size()", String.valueOf(mLyric.transSentenceList.size()));
+        if (mLyric.transSentenceList.size() != 0) {
+            transSentence = LyricUtils.getSentence(mLyric.transSentenceList, position);
+        }
+        int nextfound = LyricUtils.getSentenceIndex(mLyric.sentenceList, position,0 ,0) + 1;
         Lyric.Sentence nextSentence = null;
         if (nextfound < mLyric.sentenceList.size()) {
             nextSentence = mLyric.sentenceList.get(nextfound);
-        }
-        if (mLyric.transSentenceList != null) {
-            transSentence = mLyric.transSentenceList.get(LyricUtils.getTransSentenceIndex(mLyric, position ,0,0));
         }
         if (sentence == null) return;
         if (sentence.fromTime != mLastSentenceFromTime) {
@@ -281,12 +283,11 @@ public class MusicListenerService extends NotificationListenerService {
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            if (Constants.isTransCheck && transSentence != null) {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n\r" + sentence, true, drawBase64, false, "", getPackageName(), delay);
+            if (Constants.isTransCheck && transSentence != null && !Objects.equals(transSentence.content, "")) {
+                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n" +  transSentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
             } else {
                 EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
             }
-            // Log.d("mLyric", mLyric.toString());
         }
     }
 

@@ -43,22 +43,24 @@ public class LyricUtils {
             Log.i(TAG, String.format("parseLyric(%s, %s)", file.getPath(), Encoding));
             String line;
             while ((line = br.readLine()) != null) {
-                parseLine(line, lyric);
+                parseLine(lyric.sentenceList, line, lyric);
             }
-            Collections.sort(lyric.sentenceList, new Lyric.SentenceComparator());
+            lyric.sentenceList.sort(new Lyric.SentenceComparator());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(transfile.toPath()), Encoding));
-            Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
-            String line;
-            while ((line = br.readLine()) != null) {
-                parseLine(line, lyric);
+        if (transfile != null) {
+            try {
+                BufferedReader tbr = new BufferedReader(new InputStreamReader(Files.newInputStream(transfile.toPath()), Encoding));
+                Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
+                String transLine;
+                while ((transLine = tbr.readLine()) != null) {
+                    parseLine(lyric.transSentenceList, transLine, lyric);
+                }
+                lyric.transSentenceList.sort(new Lyric.SentenceComparator());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            Collections.sort(lyric.transSentenceList, new Lyric.SentenceComparator());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         if (TextUtils.isEmpty(lyric.title) || TextUtils.isEmpty(lyric.artist)) {
             String title;
@@ -93,51 +95,52 @@ public class LyricUtils {
     /**
      * Get sentence according to timestamp.
      */
-    public static Sentence getSentence(Lyric lyric, long ts) {
-        return getSentence(lyric, ts, 0);
+    public static Sentence getSentence(List<Sentence> lyricList, long ts) {
+        return getSentence(lyricList, ts, 0);
     }
 
     /**
      * Get sentence according to timestamp and current index.
      */
-    public static Sentence getSentence(Lyric lyric, long ts, int index) {
-        return getSentence(lyric, ts, index, 0);
+    public static Sentence getSentence(List<Sentence> lyricList, long ts, int index) {
+        return getSentence(lyricList, ts, index, 0);
     }
 
     /**
      * Get sentence according to timestamp, current index, offset.
      */
-    public static Sentence getSentence(Lyric lyric, long ts, int index, int offset) {
-        int found = getSentenceIndex(lyric, ts, index, offset);
+    public static Sentence getSentence(List<Sentence> lyricList, long ts, int index, int offset) {
+        int found = getSentenceIndex(lyricList, ts, index, offset);
         if (found == -1)
             return null;
-        return lyric.sentenceList.get(found);
+        return lyricList.get(found);
     }
 
     /**
      * Get current index of sentence list.
      *
-     * @param lyric  Lyric file.
+     * @param lyricList<Sentence>  Lyric file.
      * @param ts     Current timestamp.
      * @param index  Current index.
      * @param offset Lyric offset.
      * @return current sentence index, -1 if before first, -2 if not found.
      */
-    public static int getSentenceIndex(Lyric lyric, long ts, int index, int offset) {
-        if (lyric == null || ts < 0 || index < -1)
-            return -1;
-        List<Sentence> list = lyric.sentenceList;
+    public static int getSentenceIndex(List<Sentence> lyricList, long ts, int index, int offset) {
+//        if (lyricList.size() != 0 || ts < 0 || index < -1) {
+//            Log.d(TAG, "-1");
+//            return -1;
+//        }
 
-        if (index >= list.size())
-            index = list.size() - 1;
+        if (index >= lyricList.size())
+            index = lyricList.size() - 1;
         if (index == -1)
             index = 0;
 
         int found = -2;
 
-        if (list.get(index).fromTime + offset > ts) {
+        if (lyricList.get(index).fromTime + offset > ts) {
             for (int i = index; i > -1; --i) {
-                if (list.get(i).fromTime + offset <= ts) {
+                if (lyricList.get(i).fromTime + offset <= ts) {
                     found = i;
                     break;
                 }
@@ -146,62 +149,23 @@ public class LyricUtils {
             if (found == -2)
                 found = -1;
         } else {
-            for (int i = index; i < list.size() - 1; ++i) {
-                //Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, list.get(i).getFromTime(), list.get(i + 1).getFromTime()));
-                if (list.get(i + 1).fromTime + offset > ts) {
+            for (int i = index; i < lyricList.size() - 1; ++i) {
+                Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, lyricList.get(i).fromTime, lyricList.get(i + 1).fromTime));
+                if (lyricList.get(i + 1).fromTime + offset > ts) {
                     found = i;
                     break;
                 }
             }
             // If not found, return last mLyricIndex
             if (found == -2) {
-                found = list.size() - 1;
+                found = lyricList.size() - 1;
             }
         }
 
         return found;
     }
 
-    public static int getTransSentenceIndex(Lyric lyric, long ts, int index, int offset) {
-        if (lyric == null || ts < 0 || index < -1)
-            return -1;
-        List<Sentence> list = lyric.transSentenceList;
-
-        if (index >= list.size())
-            index = list.size() - 1;
-        if (index == -1)
-            index = 0;
-
-        int found = -2;
-
-        if (list.get(index).fromTime + offset > ts) {
-            for (int i = index; i > -1; --i) {
-                if (list.get(i).fromTime + offset <= ts) {
-                    found = i;
-                    break;
-                }
-            }
-            // First line of lyric is bigger than starting time.
-            if (found == -2)
-                found = -1;
-        } else {
-            for (int i = index; i < list.size() - 1; ++i) {
-                //Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, list.get(i).getFromTime(), list.get(i + 1).getFromTime()));
-                if (list.get(i + 1).fromTime + offset > ts) {
-                    found = i;
-                    break;
-                }
-            }
-            // If not found, return last mLyricIndex
-            if (found == -2) {
-                found = list.size() - 1;
-            }
-        }
-
-        return found;
-    }
-
-    private static boolean parseLine(String line, Lyric lyric) {
+    private static boolean parseLine(List<Sentence> sentenceList, String line, Lyric lyric) {
         int lineLength = line.length();
         line = line.trim();
         int openBracketIndex, closedBracketIndex;
@@ -255,7 +219,7 @@ public class LyricUtils {
 
                     String content = line.substring(closedBracketIndex + 1, line.length());
                     for (long timestamp : timestampList) {
-                        lyric.addSentence(content, timestamp);
+                        lyric.addSentence(sentenceList, content, timestamp);
                     }
                 } else {
                     // Ignore unknown tag
