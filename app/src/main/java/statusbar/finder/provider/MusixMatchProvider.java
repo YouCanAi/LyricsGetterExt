@@ -23,10 +23,10 @@ public class MusixMatchProvider implements ILrcProvider {
 
     private static final String MUSIXMATCH_BASE_URL = "https://apic.musixmatch.com/ws/1.1/";
     private static final String MUSIXMATCH_TOKEN_URL_FORMAT = MUSIXMATCH_BASE_URL + "token.get?guid=%s&app_id=android-player-v1.0&format=json";
-    private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&track_id=%s&app_id=android-player-v1.0&format=json";
+    private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&track_id=%d&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.search?app_id=android-player-v1.0&usertoken=%s&q=%s";
     private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
-    private static final String MUSIXMATCH_TRANS_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=zh&track_id=%s&comment_format=text&part=user&commontrack_id=%s&format=json&app_id=android-player-v1.0&tags=playing";
+    private static final String MUSIXMATCH_TRANS_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=%s&track_id=%d&comment_format=text&part=user&commontrack_id=%d&format=json&app_id=android-player-v1.0&tags=playing";
     private static String MUSIXMATCH_USERTOKEN;
     
     @Override
@@ -44,13 +44,12 @@ public class MusixMatchProvider implements ILrcProvider {
             if (searchResult != null && searchResult.getJSONObject("message").getJSONObject("header").getLong("status_code") == 200) {
                 JSONArray array = searchResult.getJSONObject("message").getJSONObject("body").getJSONObject("macro_result_list").getJSONArray("track_list");
                 Pair<String, Long> pair = getLrcUrl(array, data);
+                LyricResult result = new LyricResult();
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
-                    LyricResult result = new LyricResult();
                     result.mLyric = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle").getString("subtitle_body");
                     result.mDistance = pair.second;
                     result.source = "MusixMatch";
-                    return result;
                 } else {
                     // 无法通过 id 寻找到歌词时
                     // 则尝试使用直接搜索歌词的方法
@@ -63,23 +62,18 @@ public class MusixMatchProvider implements ILrcProvider {
                             track,
                             artist,
                             album);
-                    try {
-                        JSONObject lrcJson = HttpRequestUtil.getJsonResponse(lrcUrl);
-                        LyricResult result = new LyricResult();
-                        JSONObject subTitleJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle");
-                        JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
-                        result.mLyric = subTitleJson.getString("subtitle_body");
-                        String soundName = infoJson.getString("track_name");
-                        String albumName = infoJson.getString("album_name");
-                        String artistName = infoJson.getString("artist_name");
-                        result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
-                        result.source = "MusixMatch";
-                        return result;
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
+                    JSONObject lrcJson = HttpRequestUtil.getJsonResponse(lrcUrl);
+                    JSONObject subTitleJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle");
+                    JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
+                    result.mLyric = subTitleJson.getString("subtitle_body");
+                    String soundName = infoJson.getString("track_name");
+                    String albumName = infoJson.getString("album_name");
+                    String artistName = infoJson.getString("artist_name");
+                    result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
+                    result.source = "MusixMatch";
                 }
+
+                return result;
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -123,9 +117,11 @@ public class MusixMatchProvider implements ILrcProvider {
         }
     }
 
-//    private String getTransLyric(LyricResult lyricResult, long track_id, long commontrack_id) {
-//
-//    }
+    private String getTransLyric(String lyricText, long track_id, long commontrack_id) {
+        String transLyricURL = String.format(MUSIXMATCH_TRANS_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, track_id, commontrack_id);
+        // TODO: Replacement of original lyrics content based on request results
+        return null;
+    }
 
     private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
         String result;

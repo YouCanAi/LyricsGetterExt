@@ -56,8 +56,16 @@ public class LrcGetter {
         for (ILrcProvider provider : providers) {
             try {
                 ILrcProvider.LyricResult lyricResult = provider.getLyric(mediaMetadata);
-                if (lyricResult != null && LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
-                    currentResult = lyricResult;
+                if (lyricResult != null)
+                {
+                    if (LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
+                        currentResult = lyricResult;
+                    }
+                    if (currentResult != null){
+                        if (currentResult.mTransLyric == null && lyricResult.mTransLyric != null) {
+                            currentResult.mTransLyric = lyricResult.mTransLyric;
+                        }
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

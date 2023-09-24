@@ -63,9 +63,5 @@ public class Lyric {
         public String toString() {
             return String.valueOf(fromTime) + ": " + content;
         }
-
-        public long getFromTime() {
-            return this.fromTime;
-        }
     }
 }

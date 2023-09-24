@@ -52,7 +52,7 @@ public class LyricUtils {
         if (transfile != null) {
             try {
                 BufferedReader tbr = new BufferedReader(new InputStreamReader(Files.newInputStream(transfile.toPath()), Encoding));
-                Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
+                // Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
                 String transLine;
                 while ((transLine = tbr.readLine()) != null) {
                     parseLine(lyric.transSentenceList, transLine, lyric);
@@ -126,10 +126,10 @@ public class LyricUtils {
      * @return current sentence index, -1 if before first, -2 if not found.
      */
     public static int getSentenceIndex(List<Sentence> lyricList, long ts, int index, int offset) {
-//        if (lyricList.size() != 0 || ts < 0 || index < -1) {
-//            Log.d(TAG, "-1");
-//            return -1;
-//        }
+        if (lyricList.size() == 0 || ts < 0 || index < -1) {
+            Log.d(TAG, "-1");
+            return -1;
+        }
 
         if (index >= lyricList.size())
             index = lyricList.size() - 1;
