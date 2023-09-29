@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
+import statusbar.finder.misc.Constants;
 import statusbar.finder.provider.*;
 import statusbar.finder.provider.utils.LyricSearchUtil;
 import statusbar.finder.misc.checkStringLang;
@@ -61,22 +62,24 @@ public class LrcGetter {
                     if (LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
                         currentResult = lyricResult;
                     }
-                    if (currentResult != null){
-                        if (currentResult.mTransLyric == null && lyricResult.mTransLyric != null) {
-                            currentResult.mTransLyric = lyricResult.mTransLyric;
-                        }
-                    }
+//                    if (currentResult != null){
+//                        if (currentResult.mTransLyric == null && lyricResult.mTransLyric != null) {
+//                            // currentResult.mTransLyric = lyricResult.mTransLyric;
+//                        }
+//                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         if (currentResult != null && LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
-            String allLyrics = currentResult.getAllLyrics(false);
-            if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
-                currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
-            } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
-                currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
+            if (!Constants.isTransCheck){
+                String allLyrics = currentResult.getAllLyrics(false);
+                if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
+                    currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
+                } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
+                    currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
+                }
             }
             try {
                 FileOutputStream lrcOut = new FileOutputStream(requireLrcPath);

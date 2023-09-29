@@ -26,7 +26,7 @@ public class MusixMatchProvider implements ILrcProvider {
     private static final String MUSIXMATCH_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&track_id=%d&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.search?app_id=android-player-v1.0&usertoken=%s&q=%s";
     private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
-    private static final String MUSIXMATCH_TRANS_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=%s&track_id=%d&comment_format=text&part=user&commontrack_id=%d&format=json&app_id=android-player-v1.0&tags=playing";
+    private static final String MUSIXMATCH_TRANS_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=%s&track_id=%d&comment_format=text&part=user&format=json&app_id=android-player-v1.0&tags=playing";
     private static String MUSIXMATCH_USERTOKEN;
     
     @Override
@@ -117,8 +117,8 @@ public class MusixMatchProvider implements ILrcProvider {
         }
     }
 
-    private String getTransLyric(String lyricText, long track_id, long commontrack_id) {
-        String transLyricURL = String.format(MUSIXMATCH_TRANS_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, track_id, commontrack_id);
+    private String getTransLyric(String lyricText, long track_id) {
+        String transLyricURL = String.format(MUSIXMATCH_TRANS_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, track_id);
         // TODO: Replacement of original lyrics content based on request results
         return null;
     }

@@ -60,6 +60,7 @@ public class MusicListenerService extends NotificationListenerService {
 
     private static String systemLanguage;
     private String drawBase64;
+    private Thread curLrcUpdateThread;
 
     private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -121,9 +122,9 @@ public class MusicListenerService extends NotificationListenerService {
             mLyric = null;
             if (metadata == null) return;
             requiredLrcTitle = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-            if (!Constants.isLrcUpdateThreadRunning) {
-                Constants.isLrcUpdateThreadRunning = true;
-                new LrcUpdateThread(getApplicationContext(), mHandler, metadata).start();
+            if (curLrcUpdateThread == null || !curLrcUpdateThread.isAlive()) {
+                curLrcUpdateThread = new LrcUpdateThread(getApplicationContext(), mHandler, metadata);
+                curLrcUpdateThread.start();
             }
         }
     };
@@ -259,37 +260,57 @@ public class MusicListenerService extends NotificationListenerService {
     }
 
     private void updateLyric(long position) {
-        if (mNotificationManager == null || mLyric == null) return;
-        int delay;
+        if (mNotificationManager == null || mLyric == null) {
+            return;
+        }
+
         Lyric.Sentence sentence = LyricUtils.getSentence(mLyric.sentenceList, position);
-        Lyric.Sentence transSentence = null;
-        Log.d("mLyric.transSentenceList.size()", String.valueOf(mLyric.transSentenceList.size()));
-        if (mLyric.transSentenceList.size() != 0) {
-            transSentence = LyricUtils.getSentence(mLyric.transSentenceList, position);
+        if (sentence == null) {
+            return;
         }
-        int nextfound = LyricUtils.getSentenceIndex(mLyric.sentenceList, position,0 ,0) + 1;
-        Lyric.Sentence nextSentence = null;
-        if (nextfound < mLyric.sentenceList.size()) {
-            nextSentence = mLyric.sentenceList.get(nextfound);
-        }
-        if (sentence == null) return;
+
+        int delay = calculateDelay(position);
+
         if (sentence.fromTime != mLastSentenceFromTime) {
-            delay = 0;
-            if (nextSentence != null) {
-                delay = (int) (nextSentence.fromTime - sentence.fromTime) / 1000 - 3;
-                if (delay < 0){delay = 0;}
+
+            String curLyric = sentence.content.trim();
+            if (Constants.isTransCheck) { // 增添翻译
+                Lyric.Sentence transSentence = getTransSentence(position);
+                if (transSentence != null && !Objects.equals(transSentence.content, "") && !Objects.equals(sentence.content, "")) {
+                    curLyric += "\n\r" + transSentence.content.trim();
+                }
             }
-            mLyricNotification.tickerText = sentence.content;
+
+            EventTools.INSTANCE.sendLyric(getApplicationContext(), curLyric, true, drawBase64, false, "", getPackageName(), delay);
+            mLyricNotification.tickerText = curLyric;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);
             mLastSentenceFromTime = sentence.fromTime;
-            if (Constants.isTransCheck && transSentence != null && !Objects.equals(transSentence.content, "")) {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim() + "\n" +  transSentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
-            } else {
-                EventTools.INSTANCE.sendLyric(getApplicationContext(), sentence.content.trim(), true, drawBase64, false, "", getPackageName(), delay);
-            }
         }
     }
+
+    private int calculateDelay(long position) {  // 计算Delay
+        int delay = 0;
+        int nextfound = LyricUtils.getSentenceIndex(mLyric.sentenceList, position, 0, 0) + 1; // 获取下一句歌词的 Sentence
+
+        if (nextfound < mLyric.sentenceList.size()) { //判断是否超出范围 防止崩溃
+            Lyric.Sentence nextSentence = mLyric.sentenceList.get(nextfound);
+            delay = (int) (nextSentence.fromTime - position) / 1000 / 2;
+            if (delay < 0) {
+                delay = 0;
+            }
+        }
+
+        return delay;
+    }
+
+    private Lyric.Sentence getTransSentence(long position) {  // 获取翻译歌词
+        if (mLyric.transSentenceList.size() != 0) {
+            return LyricUtils.getSentence(mLyric.transSentenceList, position);
+        }
+        return null;
+    }
+
 
     private static class LrcUpdateThread extends Thread {
         private final Handler handler;
@@ -314,7 +335,6 @@ public class MusicListenerService extends NotificationListenerService {
             bundle.putString("title", data.getString(MediaMetadata.METADATA_KEY_TITLE));
             message.setData(bundle);
             handler.sendMessage(message);
-            Constants.isLrcUpdateThreadRunning = false;
         }
     }
 
