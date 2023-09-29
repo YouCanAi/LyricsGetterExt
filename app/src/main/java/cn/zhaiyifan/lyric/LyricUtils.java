@@ -150,7 +150,7 @@ public class LyricUtils {
                 found = -1;
         } else {
             for (int i = index; i < lyricList.size() - 1; ++i) {
-                Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, lyricList.get(i).fromTime, lyricList.get(i + 1).fromTime));
+                // Log.d(TAG, String.format("ts: %d, offset: %d, curr_ts: %d, next_ts: %d", ts, offset, lyricList.get(i).fromTime, lyricList.get(i + 1).fromTime));
                 if (lyricList.get(i + 1).fromTime + offset > ts) {
                     found = i;
                     break;

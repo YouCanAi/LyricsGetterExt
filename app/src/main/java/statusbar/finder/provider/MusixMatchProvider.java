@@ -1,6 +1,7 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
+import android.util.Log;
 import android.util.Pair;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
@@ -16,12 +17,15 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
+import statusbar.finder.misc.Constants;
 import statusbar.finder.misc.checkStringLang;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
+import statusbar.finder.provider.utils.UnicodeUtil;
 
 public class MusixMatchProvider implements ILrcProvider {
 
@@ -80,7 +84,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
                     result.source = "MusixMatch";
                 }
-                result.mTransLyric = getTransLyric(result.mLyric, trackId);
+                if (Constants.isTransCheck){result.mTransLyric = getTransLyric(result.mLyric, trackId);};
                 return result;
             }
         } catch (JSONException e) {
@@ -135,43 +139,46 @@ public class MusixMatchProvider implements ILrcProvider {
             if (transList != null) {
                 for (int curLyricLine = 0; curLyricLine < transList.length(); curLyricLine++) { // 获取每行的原歌词及翻译歌词
                     try {
-                        JSONObject currentLyricLineObject = transList.getJSONObject(curLyricLine);
-                        String encodedSnippet = currentLyricLineObject.optString("snippet", ""); // 获取原文
-                        String encodedDescription = currentLyricLineObject.optString("description", ""); // 获取编码后的翻译
-                        // 解码编码后的翻译
-                        String snippet = URLDecoder.decode(encodedSnippet, "UTF-8");
-                        String description = URLDecoder.decode(encodedDescription, "UTF-8");
-
+                        JSONObject currentLyricLineObject = transList.getJSONObject(curLyricLine).getJSONObject("translation");
+                        String encodedSnippet = currentLyricLineObject.getString("snippet");
+                        String encodedDescription = currentLyricLineObject.getString("description");
+                        // 解码 Unicode
+                        String snippet = UnicodeUtil.unicodeStr2String(encodedSnippet);
+                        String description = UnicodeUtil.unicodeStr2String(encodedDescription);
+                        Log.d("getTransLyric: ", String.format(Locale.getDefault(),"s: %s d: %s", snippet, description));
                         for (String lyricLine : lyricText.split("\n")) {
-                            String timestamp = extractTimestamp(lyricLine); // 提取时间戳，实现方式可能不同
-                            if (timestamp != null && snippet.contains(timestamp)) {
-                                // 如果有翻译，替换原文
-                                modifiedLyricText.add("[" + timestamp + "]" + description);
-                            } else {
-                                // 否则保留原文
-                                modifiedLyricText.add(lyricLine);
+                            String[] lyric = extractLyric(lyricLine); // 提取歌词
+                            if (lyric != null) {
+                                if (Objects.equals(lyric[1], snippet)){
+                                    modifiedLyricText.add("[" + lyric[0] + "] " + description);
+                                }
                             }
                         }
-                    } catch (JSONException | UnsupportedEncodingException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                         return null;
                     }
                 }
+                Log.d("mLyTe", String.join("\n", modifiedLyricText));
                 return String.join("\n", modifiedLyricText);
             }
         }
         return null;
     }
 
-    private String extractTimestamp(String lyricLine) { // 获取歌词时间戳
+    private String[] extractLyric(String lyricLine) { // 解析歌词行 [0] 时间戳 [1] 歌词文本
         int startIndex = lyricLine.indexOf("[");
         int endIndex = lyricLine.indexOf("]");
 
         if (startIndex != -1 && endIndex != -1) {
-            return lyricLine.substring(startIndex + 1, endIndex);
+            String timeStamp = lyricLine.substring(startIndex + 1, endIndex);
+            String lyricText = lyricLine.substring(endIndex + 1).trim();
+            return new String[]{timeStamp, lyricText};
         }
+
         return null;
     }
+
 
 
     private JSONArray getTranslationsList(long trackId, String selectLang) { // 获取翻译歌词列表
