@@ -34,6 +34,7 @@ android {
         baseline = file("lint-baseline.xml")
     }
     namespace 'statusbar.finder'
+    testBuildType "release"
 }
 
 dependencies {
@@ -49,7 +50,7 @@ dependencies {
     implementation group: 'com.github.houbb', name: 'opencc4j', version: '1.8.1'
     implementation group: 'io.github.kju2.languagedetector', name: 'language-detector', version: '1.0.5'
     implementation 'com.github.xiaowine:Lyric-Getter-Api:5.0.5'
-
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 repositories {
     mavenCentral()

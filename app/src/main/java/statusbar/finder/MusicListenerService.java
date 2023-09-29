@@ -20,7 +20,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -294,7 +293,7 @@ public class MusicListenerService extends NotificationListenerService {
 
         if (nextfound < mLyric.sentenceList.size()) { //判断是否超出范围 防止崩溃
             Lyric.Sentence nextSentence = mLyric.sentenceList.get(nextfound);
-            delay = (int) (nextSentence.fromTime - position) / 1000 / 2;
+            delay = (int) (nextSentence.fromTime - position) / 1000 / 4;
             if (delay < 0) {
                 delay = 0;
             }

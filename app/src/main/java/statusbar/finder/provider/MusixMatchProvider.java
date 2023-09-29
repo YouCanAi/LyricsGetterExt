@@ -12,15 +12,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import cn.zhaiyifan.lyric.LyricUtils;
-import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.misc.Constants;
 import statusbar.finder.misc.checkStringLang;
 import statusbar.finder.provider.utils.HttpRequestUtil;

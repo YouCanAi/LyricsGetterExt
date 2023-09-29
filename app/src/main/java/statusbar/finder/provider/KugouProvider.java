@@ -1,5 +1,7 @@
 package statusbar.finder.provider;
 
+import static org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4;
+
 import android.media.MediaMetadata;
 
 import org.json.JSONArray;
@@ -33,7 +35,7 @@ public class KugouProvider implements ILrcProvider {
                 if(pair != null){
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     LyricResult result = new LyricResult();
-                    result.mLyric = new String(Base64.decode(lrcJson.getString("content").getBytes(), Base64.DEFAULT));
+                    result.mLyric = unescapeHtml4(new String(Base64.decode(lrcJson.getString("content").getBytes(), Base64.DEFAULT)));
                     result.mDistance = pair.second;
                     result.source = "Kugou";
                     return result;
