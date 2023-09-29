@@ -11,10 +11,14 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import cn.zhaiyifan.lyric.LyricUtils;
+import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.misc.checkStringLang;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
@@ -37,7 +41,7 @@ public class MusixMatchProvider implements ILrcProvider {
                 return null;
             }
         }
-        String searchUrl = String.format(MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(data));
+        String searchUrl = String.format(Locale.getDefault(), MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(data));
         JSONObject searchResult;
         try{
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
@@ -45,9 +49,12 @@ public class MusixMatchProvider implements ILrcProvider {
                 JSONArray array = searchResult.getJSONObject("message").getJSONObject("body").getJSONObject("macro_result_list").getJSONArray("track_list");
                 Pair<String, Long> pair = getLrcUrl(array, data);
                 LyricResult result = new LyricResult();
+                long trackId = -1;
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     result.mLyric = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle").getString("subtitle_body");
+                    JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
+                    trackId = infoJson.getLong("track_id");
                     result.mDistance = pair.second;
                     result.source = "MusixMatch";
                 } else {
@@ -57,7 +64,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     String track = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_TITLE));
                     String artist = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ARTIST));
                     String album = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ALBUM));
-                    lrcUrl = String.format(MUSIXMATCH_LRC_SERACH_URL_FORMAT,
+                    lrcUrl = String.format(Locale.getDefault(), MUSIXMATCH_LRC_SERACH_URL_FORMAT,
                             MUSIXMATCH_USERTOKEN,
                             track,
                             artist,
@@ -69,10 +76,11 @@ public class MusixMatchProvider implements ILrcProvider {
                     String soundName = infoJson.getString("track_name");
                     String albumName = infoJson.getString("album_name");
                     String artistName = infoJson.getString("artist_name");
+                    trackId = infoJson.getLong("track_id");
                     result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
                     result.source = "MusixMatch";
                 }
-
+                result.mTransLyric = getTransLyric(result.mLyric, trackId);
                 return result;
             }
         } catch (JSONException e) {
@@ -117,18 +125,82 @@ public class MusixMatchProvider implements ILrcProvider {
         }
     }
 
-    private String getTransLyric(String lyricText, long track_id) {
-        String transLyricURL = String.format(MUSIXMATCH_TRANS_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, track_id);
-        // TODO: Replacement of original lyrics content based on request results
+    private String getTransLyric(String lyricText, long trackId) {
+        String[] languageOptions = {"zh", "tw"};
+        int maxAttempts = languageOptions.length;
+
+        for (String selectLang : languageOptions) {
+            JSONArray transList = getTranslationsList(trackId, selectLang);
+            List<String> modifiedLyricText = new ArrayList<>();
+            if (transList != null) {
+                for (int curLyricLine = 0; curLyricLine < transList.length(); curLyricLine++) { // 获取每行的原歌词及翻译歌词
+                    try {
+                        JSONObject currentLyricLineObject = transList.getJSONObject(curLyricLine);
+                        String encodedSnippet = currentLyricLineObject.optString("snippet", ""); // 获取原文
+                        String encodedDescription = currentLyricLineObject.optString("description", ""); // 获取编码后的翻译
+                        // 解码编码后的翻译
+                        String snippet = URLDecoder.decode(encodedSnippet, "UTF-8");
+                        String description = URLDecoder.decode(encodedDescription, "UTF-8");
+
+                        for (String lyricLine : lyricText.split("\n")) {
+                            String timestamp = extractTimestamp(lyricLine); // 提取时间戳，实现方式可能不同
+                            if (timestamp != null && snippet.contains(timestamp)) {
+                                // 如果有翻译，替换原文
+                                modifiedLyricText.add("[" + timestamp + "]" + description);
+                            } else {
+                                // 否则保留原文
+                                modifiedLyricText.add(lyricLine);
+                            }
+                        }
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+                return String.join("\n", modifiedLyricText);
+            }
+        }
         return null;
     }
+
+    private String extractTimestamp(String lyricLine) { // 获取歌词时间戳
+        int startIndex = lyricLine.indexOf("[");
+        int endIndex = lyricLine.indexOf("]");
+
+        if (startIndex != -1 && endIndex != -1) {
+            return lyricLine.substring(startIndex + 1, endIndex);
+        }
+        return null;
+    }
+
+
+    private JSONArray getTranslationsList(long trackId, String selectLang) { // 获取翻译歌词列表
+        String transLyricURL = String.format(Locale.getDefault(), MUSIXMATCH_TRANS_LRC_URL_FORMAT, MUSIXMATCH_USERTOKEN, selectLang, trackId);
+
+        try {
+            JSONObject transResult = HttpRequestUtil.getJsonResponse(transLyricURL);
+            JSONObject header = transResult.getJSONObject("message").getJSONObject("header");
+            int statusCode = header.getInt("status_code");
+
+            if (statusCode != 200) {
+                return null;
+            }
+
+            JSONArray translationsList = transResult.getJSONObject("message").getJSONObject("body").getJSONArray("translations_list");
+            return translationsList.length() > 0 ? translationsList : null;
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
         String result;
         try{
             // Form Google
             JSONObject tokenJson;
-            String tokenURL = String.format(MUSIXMATCH_TOKEN_URL_FORMAT, guid);
+            String tokenURL = String.format(Locale.getDefault(), MUSIXMATCH_TOKEN_URL_FORMAT, guid);
             tokenJson = HttpRequestUtil.getJsonResponse(tokenURL);
             result = tokenJson.getJSONObject("message").getJSONObject("body").getString("user_token");
         } catch (JSONException | IOException e) {
