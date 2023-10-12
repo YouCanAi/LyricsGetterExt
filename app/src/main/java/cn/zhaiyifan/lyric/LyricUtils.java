@@ -1,17 +1,14 @@
 package cn.zhaiyifan.lyric;
 
+import android.media.MediaMetadata;
 import android.text.TextUtils;
 import android.util.Log;
 
 import cn.zhaiyifan.lyric.model.Lyric;
 import cn.zhaiyifan.lyric.model.Lyric.Sentence;
+import statusbar.finder.provider.ILrcProvider;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -36,11 +33,10 @@ public class LyricUtils {
 //        return lyric;
 //    }
 
-    public static Lyric parseLyric(File file,File transfile, String Encoding) {
+    public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, int offset, MediaMetadata mediaMetadata) {
         Lyric lyric = new Lyric();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(file.toPath()), Encoding));
-            Log.i(TAG, String.format("parseLyric(%s, %s)", file.getPath(), Encoding));
+            BufferedReader br = new BufferedReader(new StringReader(lyricResult.mLyric));
             String line;
             while ((line = br.readLine()) != null) {
                 parseLine(lyric.sentenceList, line, lyric);
@@ -49,10 +45,9 @@ public class LyricUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (transfile != null) {
+        if (lyricResult.mTransLyric != null) {
             try {
-                BufferedReader tbr = new BufferedReader(new InputStreamReader(Files.newInputStream(transfile.toPath()), Encoding));
-                // Log.i(TAG, String.format("parseTransLyric(%s, %s)", transfile.getPath(), Encoding));
+                BufferedReader tbr = new BufferedReader(new StringReader(lyricResult.mTransLyric));
                 String transLine;
                 while ((transLine = tbr.readLine()) != null) {
                     parseLine(lyric.transSentenceList, transLine, lyric);
@@ -62,24 +57,10 @@ public class LyricUtils {
                 e.printStackTrace();
             }
         }
-        if (TextUtils.isEmpty(lyric.title) || TextUtils.isEmpty(lyric.artist)) {
-            String title;
-            String artist = null;
-            String filename = file.getName();
-            filename = filename.substring(0, filename.length() - 4);
-            int index = filename.indexOf('-');
-            if (index > 0) {
-                artist = filename.substring(0, index).trim();
-                title = filename.substring(index + 1).trim();
-            } else {
-                title = filename.trim();
-            }
-            if (TextUtils.isEmpty(lyric.title) && !TextUtils.isEmpty(title)) {
-                lyric.title = title;
-            } else if (!TextUtils.isEmpty(artist)) {
-                lyric.artist = artist;
-            }
-        }
+        lyric.title = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        lyric.artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        lyric.album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        lyric.length = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         return lyric;
     }
 
@@ -126,7 +107,7 @@ public class LyricUtils {
      * @return current sentence index, -1 if before first, -2 if not found.
      */
     public static int getSentenceIndex(List<Sentence> lyricList, long ts, int index, int offset) {
-        if (lyricList.size() == 0 || ts < 0 || index < -1) {
+        if (lyricList.isEmpty() || ts < 0 || index < -1) {
             Log.d(TAG, "-1");
             return -1;
         }

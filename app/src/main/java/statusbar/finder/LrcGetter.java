@@ -1,8 +1,10 @@
 package statusbar.finder;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.Cursor;
 import android.media.MediaMetadata;
-
+import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +15,7 @@ import java.util.Objects;
 
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
+import statusbar.finder.LyricsDatabase;
 import statusbar.finder.misc.Constants;
 import statusbar.finder.provider.*;
 import statusbar.finder.provider.utils.LyricSearchUtil;
@@ -28,52 +31,42 @@ public class LrcGetter {
             new KugouProvider(),
             // new QQMusicProvider(), Can't working.
     };
-
     private static MessageDigest messageDigest;
-    private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
 
     public static Lyric getLyric(Context context, MediaMetadata mediaMetadata, String sysLang) {
+        LyricsDatabase lyricsDatabase = new LyricsDatabase(context);
+
         if (messageDigest == null) {
             try {
-                messageDigest =  MessageDigest.getInstance("SHA");
+                messageDigest = MessageDigest.getInstance("SHA");
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
                 return null;
             }
         }
-        File cachePath = context.getCacheDir();
-        String meta = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) + "," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) + "," +
-                mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM) + ", " + mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-        String transMeta = "Trans," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) + "," + mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) + "," +
-                mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM) + ", " + mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-        File requireLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(meta.getBytes())) + ".lrc");
-        File requireTransLrcPath = new File(cachePath, printHexBinary(messageDigest.digest(transMeta.getBytes())) + ".lrc");
-        if (requireLrcPath.exists() && requireTransLrcPath.exists()) {
-            return LyricUtils.parseLyric(requireLrcPath, requireTransLrcPath,"UTF-8");
-        } else if (requireLrcPath.exists()) {
-            return LyricUtils.parseLyric(requireLrcPath, null,"UTF-8");
+
+        ILrcProvider.LyricResult currentResult = searchLyricFromDatabase(lyricsDatabase, mediaMetadata);
+        int _offset = getOffsetFromDatabase(lyricsDatabase, mediaMetadata);
+        if (currentResult != null) {
+            return LyricUtils.parseLyric(currentResult, _offset, mediaMetadata);
         }
-        ILrcProvider.LyricResult currentResult = null;
         for (ILrcProvider provider : providers) {
             try {
                 ILrcProvider.LyricResult lyricResult = provider.getLyric(mediaMetadata);
-                if (lyricResult != null)
-                {
+                if (lyricResult != null) {
                     if (LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
                         currentResult = lyricResult;
                     }
-//                    if (currentResult != null){
-//                        if (currentResult.mTransLyric == null && lyricResult.mTransLyric != null) {
-//                            // currentResult.mTransLyric = lyricResult.mTransLyric;
-//                        }
-//                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        if (currentResult != null && LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
-            if (!Constants.isTransCheck){
+        if  (currentResult == null) {
+            return null;
+        }
+        if (LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
+            if (!Constants.isTransCheck) {
                 String allLyrics = currentResult.getAllLyrics(false);
                 if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
                     currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
@@ -81,34 +74,82 @@ public class LrcGetter {
                     currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
                 }
             }
-            try {
-                FileOutputStream lrcOut = new FileOutputStream(requireLrcPath);
-                lrcOut.write(currentResult.mLyric.getBytes());
-                lrcOut.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (currentResult.mTransLyric != null) {
-                try {
-                    FileOutputStream transLrcOut = new FileOutputStream(requireTransLrcPath);
-                    transLrcOut.write(currentResult.mTransLyric.getBytes());
-                    transLrcOut.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return LyricUtils.parseLyric(requireLrcPath, requireTransLrcPath,"UTF-8");
-            }
-            return LyricUtils.parseLyric(requireLrcPath,null, "UTF-8");
+        }
+        if (insertLyricIntoDatabase(lyricsDatabase, currentResult, mediaMetadata)) {
+            return LyricUtils.parseLyric(currentResult, _offset, mediaMetadata);
         }
         return null;
     }
 
-    public static String printHexBinary(byte[] data) {
-        StringBuilder r = new StringBuilder(data.length * 2);
-        for (byte b : data) {
-            r.append(hexCode[(b >> 4) & 0xF]);
-            r.append(hexCode[b & 0xF]);
+    @SuppressLint("Range")
+    private static ILrcProvider.LyricResult searchLyricFromDatabase(LyricsDatabase lyricsDatabase, MediaMetadata mediaMetadata) {
+        ILrcProvider.LyricResult result = new ILrcProvider.LyricResult();
+        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+
+        String query = "SELECT lyric, translated_lyric, lyric_source, distance FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
+        SQLiteDatabase db = lyricsDatabase.getReadableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                result.mLyric = cursor.getString(cursor.getColumnIndex("lyric"));
+                result.mTransLyric = cursor.getString(cursor.getColumnIndex("translated_lyric"));
+                result.source = cursor.getString(cursor.getColumnIndex("lyric_source"));
+                result.mDistance = cursor.getLong(cursor.getColumnIndex("distance"));
+
+                cursor.close();
+                return result;
+            }
+            cursor.close();
         }
-        return r.toString();
+        return null;
+    }
+
+    @SuppressLint("Range")
+    private static int getOffsetFromDatabase(LyricsDatabase lyricsDatabase, MediaMetadata mediaMetadata) {
+        int result;
+        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+
+        String query = "SELECT _offset FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
+        SQLiteDatabase db = lyricsDatabase.getReadableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                result = cursor.getInt(cursor.getColumnIndex("_offset"));
+                cursor.close();
+                return result;
+            }
+            cursor.close();
+        }
+        return 0;
+    }
+
+    private static boolean insertLyricIntoDatabase(LyricsDatabase lyricsDatabase, ILrcProvider.LyricResult lyricResult, MediaMetadata mediaMetadata) {
+        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+
+        String query = "INSERT INTO Lyrics (song, artist, album, duration, distance, lyric, translated_lyric, lyric_source, _offset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        SQLiteDatabase db = lyricsDatabase.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.execSQL(query, new Object[]{song, artist, album, duration, lyricResult.mDistance, lyricResult.mLyric, lyricResult.mTransLyric, lyricResult.source, 0});
+
+            db.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.endTransaction();
+        }
     }
 }

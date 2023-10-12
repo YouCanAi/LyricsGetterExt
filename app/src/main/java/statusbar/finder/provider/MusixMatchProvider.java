@@ -142,7 +142,6 @@ public class MusixMatchProvider implements ILrcProvider {
                         // 解码 Unicode
                         String snippet = UnicodeUtil.unicodeStr2String(encodedSnippet);
                         String description = UnicodeUtil.unicodeStr2String(encodedDescription);
-                        Log.d("getTransLyric: ", String.format(Locale.getDefault(),"s: %s d: %s", snippet, description));
                         for (String lyricLine : lyricText.split("\n")) {
                             String[] lyric = extractLyric(lyricLine); // 提取歌词
                             if (lyric != null) {
@@ -156,7 +155,6 @@ public class MusixMatchProvider implements ILrcProvider {
                         return null;
                     }
                 }
-                Log.d("mLyTe", String.join("\n", modifiedLyricText));
                 return String.join("\n", modifiedLyricText);
             }
         }

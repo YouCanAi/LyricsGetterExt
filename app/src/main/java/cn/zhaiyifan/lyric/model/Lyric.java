@@ -7,13 +7,13 @@ import java.util.List;
 public class Lyric {
     private static final String TAG = Lyric.class.getSimpleName();
 
-    public String title;
-    public String artist;
-    public String album;
+    public String title; // 歌曲名称
+    public String artist; // 歌曲作家
+    public String album; // 歌曲专辑
     public String by;
     public String author;
-    public int offset;
-    public long length;
+    public int offset; // 偏移值
+    public long length; // 歌曲长度
     public List<Sentence> sentenceList = new ArrayList<Sentence>(100);
     public List<Sentence> transSentenceList = new ArrayList<Sentence>(100);
 
