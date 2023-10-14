@@ -37,7 +37,7 @@ public class KugouProvider implements ILrcProvider {
                     LyricResult result = new LyricResult();
                     result.mLyric = unescapeHtml4(new String(Base64.decode(lrcJson.getString("content").getBytes(), Base64.DEFAULT)));
                     result.mDistance = pair.second;
-                    result.source = "Kugou";
+                    result.mSource = "Kugou";
                     return result;
                 } else {
                     return null;

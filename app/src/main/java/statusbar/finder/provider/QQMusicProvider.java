@@ -35,7 +35,7 @@ public class QQMusicProvider implements ILrcProvider {
                     LyricResult result = new LyricResult();
                     result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
                     result.mDistance = pair.second;
-                    result.source = "QQ";
+                    result.mSource = "QQ";
                     return result;
                 } else {
                     return null;

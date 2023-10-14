@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+import android.util.Log;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
 import statusbar.finder.LyricsDatabase;
@@ -46,9 +47,8 @@ public class LrcGetter {
         }
 
         ILrcProvider.LyricResult currentResult = searchLyricFromDatabase(lyricsDatabase, mediaMetadata);
-        int _offset = getOffsetFromDatabase(lyricsDatabase, mediaMetadata);
         if (currentResult != null) {
-            return LyricUtils.parseLyric(currentResult, _offset, mediaMetadata);
+            return LyricUtils.parseLyric(currentResult, mediaMetadata);
         }
         for (ILrcProvider provider : providers) {
             try {
@@ -65,21 +65,33 @@ public class LrcGetter {
         if  (currentResult == null) {
             return null;
         }
-        if (LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
-            String allLyrics;
-            if (Constants.isTransCheck) {
-                allLyrics = LyricUtils.getAllLyrics(false, currentResult.mTransLyric);
+        String allLyrics;
+        if (Constants.isTransCheck) {
+            if (currentResult.mTranslatedLyric != null) {
+                allLyrics = LyricUtils.getAllLyrics(false, currentResult.mTranslatedLyric);
             } else {
                 allLyrics = LyricUtils.getAllLyrics(false, currentResult.mLyric);
             }
-            if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
+        } else {
+            allLyrics = LyricUtils.getAllLyrics(false, currentResult.mLyric);
+        }
+
+        if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
+            if (currentResult.mTranslatedLyric != null) {
+                currentResult.mTranslatedLyric = ZhConverterUtil.toSimple(currentResult.mTranslatedLyric);
+            } else {
                 currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
-            } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
+            }
+        } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
+            if (currentResult.mTranslatedLyric != null) {
+                currentResult.mTranslatedLyric = ZhConverterUtil.toTraditional(currentResult.mTranslatedLyric);
+            } else {
                 currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
             }
         }
+
         if (insertLyricIntoDatabase(lyricsDatabase, currentResult, mediaMetadata)) {
-            return LyricUtils.parseLyric(currentResult, _offset, mediaMetadata);
+            return LyricUtils.parseLyric(currentResult, mediaMetadata);
         }
         return null;
     }
@@ -90,22 +102,30 @@ public class LrcGetter {
         String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
         long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-
+        @SuppressLint("Recycle") Cursor cursor;
         if (song == null || artist == null) {
             return null;
         }
 
         ILrcProvider.LyricResult result = new ILrcProvider.LyricResult();
-        String query = "SELECT lyric, translated_lyric, lyric_source, distance FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
         SQLiteDatabase db = lyricsDatabase.getReadableDatabase();
-        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
+        Log.d("searchLyricFromDatabase: ", String.format("SearchInfo : %s - %s - %s - %d", song, artist, album, duration));
+        if (album != null) {
+            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
+             cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
+        } else {
+            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE song = ? AND artist = ? AND duration = ?";
+            cursor = db.rawQuery(query, new String[]{song, artist, String.valueOf(duration)});
+        }
+
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 result.mLyric = cursor.getString(cursor.getColumnIndex("lyric"));
-                result.mTransLyric = cursor.getString(cursor.getColumnIndex("translated_lyric"));
-                result.source = cursor.getString(cursor.getColumnIndex("lyric_source"));
+                result.mTranslatedLyric = cursor.getString(cursor.getColumnIndex("translated_lyric"));
+                result.mSource = cursor.getString(cursor.getColumnIndex("lyric_source"));
                 result.mDistance = cursor.getLong(cursor.getColumnIndex("distance"));
+                result.mOffset = (int) cursor.getLong(cursor.getColumnIndex("_offset"));
 
                 cursor.close();
                 return result;
@@ -113,29 +133,6 @@ public class LrcGetter {
             cursor.close();
         }
         return null;
-    }
-
-    @SuppressLint("Range")
-    private static int getOffsetFromDatabase(LyricsDatabase lyricsDatabase, MediaMetadata mediaMetadata) {
-        int result;
-        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-
-        String query = "SELECT _offset FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
-        SQLiteDatabase db = lyricsDatabase.getReadableDatabase();
-        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                result = cursor.getInt(cursor.getColumnIndex("_offset"));
-                cursor.close();
-                return result;
-            }
-            cursor.close();
-        }
-        return 0;
     }
 
     private static boolean insertLyricIntoDatabase(LyricsDatabase lyricsDatabase, ILrcProvider.LyricResult lyricResult, MediaMetadata mediaMetadata) {
@@ -152,7 +149,7 @@ public class LrcGetter {
         SQLiteDatabase db = lyricsDatabase.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.execSQL(query, new Object[]{song, artist, album, duration, lyricResult.mDistance, lyricResult.mLyric, lyricResult.mTransLyric, lyricResult.source, 0});
+            db.execSQL(query, new Object[]{song, artist, album, duration, lyricResult.mDistance, lyricResult.mLyric, lyricResult.mTranslatedLyric, lyricResult.mSource, lyricResult.mOffset});
 
             db.setTransactionSuccessful();
             return true;

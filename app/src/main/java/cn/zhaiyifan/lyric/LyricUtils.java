@@ -51,7 +51,7 @@ public class LyricUtils {
         }
     }
 
-    public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, int offset, MediaMetadata mediaMetadata) {
+    public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, MediaMetadata mediaMetadata) {
         Lyric lyric = new Lyric();
         try {
             BufferedReader br = new BufferedReader(new StringReader(lyricResult.mLyric));
@@ -63,9 +63,9 @@ public class LyricUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (lyricResult.mTransLyric != null) {
+        if (lyricResult.mTranslatedLyric != null) {
             try {
-                BufferedReader tbr = new BufferedReader(new StringReader(lyricResult.mTransLyric));
+                BufferedReader tbr = new BufferedReader(new StringReader(lyricResult.mTranslatedLyric));
                 String transLine;
                 while ((transLine = tbr.readLine()) != null) {
                     parseLine(lyric.transSentenceList, transLine, lyric);
@@ -79,6 +79,7 @@ public class LyricUtils {
         lyric.artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         lyric.album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
         lyric.length = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        lyric.offset = lyricResult.mOffset;
         return lyric;
     }
 

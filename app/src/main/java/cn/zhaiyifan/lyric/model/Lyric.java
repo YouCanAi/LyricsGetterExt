@@ -41,7 +41,7 @@ public class Lyric {
     }
 
     public void addSentence(List<Sentence> sentenceList,String content, long time) {
-        sentenceList.add(new Sentence(content, time));
+        sentenceList.add(new Sentence(content, time + this.offset));
     }
 
     public static class SentenceComparator implements Comparator<Sentence> {
