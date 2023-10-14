@@ -66,13 +66,16 @@ public class LrcGetter {
             return null;
         }
         if (LyricSearchUtil.isLyricContent(currentResult.mLyric)) {
-            if (!Constants.isTransCheck) {
-                String allLyrics = currentResult.getAllLyrics(false);
-                if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
-                    currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
-                } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
-                    currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
-                }
+            String allLyrics;
+            if (Constants.isTransCheck) {
+                allLyrics = LyricUtils.getAllLyrics(false, currentResult.mTransLyric);
+            } else {
+                allLyrics = LyricUtils.getAllLyrics(false, currentResult.mLyric);
+            }
+            if (Objects.equals(sysLang, "zh-CN") && !checkStringLang.isJapanese(allLyrics)) {
+                currentResult.mLyric = ZhConverterUtil.toSimple(currentResult.mLyric);
+            } else if (Objects.equals(sysLang, "zh-TW") && !checkStringLang.isJapanese(allLyrics)) {
+                currentResult.mLyric = ZhConverterUtil.toTraditional(currentResult.mLyric);
             }
         }
         if (insertLyricIntoDatabase(lyricsDatabase, currentResult, mediaMetadata)) {
@@ -83,12 +86,16 @@ public class LrcGetter {
 
     @SuppressLint("Range")
     private static ILrcProvider.LyricResult searchLyricFromDatabase(LyricsDatabase lyricsDatabase, MediaMetadata mediaMetadata) {
-        ILrcProvider.LyricResult result = new ILrcProvider.LyricResult();
         String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
         String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
         long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
 
+        if (song == null || artist == null) {
+            return null;
+        }
+
+        ILrcProvider.LyricResult result = new ILrcProvider.LyricResult();
         String query = "SELECT lyric, translated_lyric, lyric_source, distance FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
         SQLiteDatabase db = lyricsDatabase.getReadableDatabase();
         @SuppressLint("Recycle") Cursor cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
@@ -136,6 +143,10 @@ public class LrcGetter {
         String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
         long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+
+        if (song == null || artist == null) {
+            return false;
+        }
 
         String query = "INSERT INTO Lyrics (song, artist, album, duration, distance, lyric, translated_lyric, lyric_source, _offset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         SQLiteDatabase db = lyricsDatabase.getWritableDatabase();

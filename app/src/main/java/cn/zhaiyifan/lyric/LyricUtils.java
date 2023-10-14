@@ -33,6 +33,24 @@ public class LyricUtils {
 //        return lyric;
 //    }
 
+    public static String getAllLyrics(boolean newLine, String lyric) {
+        StringBuilder lyricsBuilder = new StringBuilder();
+        String[] lines = lyric.split("\n");
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (trimmedLine.startsWith("[") && trimmedLine.contains("]")) {
+                int endIndex = trimmedLine.indexOf("]");
+                String lyricText = trimmedLine.substring(endIndex + 1).trim();
+                lyricsBuilder.append(lyricText).append("\n");
+            }
+        }
+        if (newLine){
+            return lyricsBuilder.toString();
+        } else {
+            return lyricsBuilder.toString().replace("\n", "");
+        }
+    }
+
     public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, int offset, MediaMetadata mediaMetadata) {
         Lyric lyric = new Lyric();
         try {
