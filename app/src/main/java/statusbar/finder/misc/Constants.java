@@ -5,6 +5,7 @@ public class Constants {
 
     public static final String PREFERENCE_KEY_ENABLED = "enabled";
     public static final String PREFERENCE_KEY_CONNECTION_STATUS = "connection_status";
+    public static final String PREFERENCE_KEY_TRANSELATE = "translate";
     public static final String PREFERENCE_KEY_ABOUT = "about";
     public static final String PREFERENCE_KEY_IGNORED_PACKAGES = "ignored_packages";
 
@@ -16,5 +17,5 @@ public class Constants {
     public static final String BROADCAST_IGNORED_APP_CHANGED = "ignored_app_changed";
 
     public static final String SETTINGS_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
-    public static boolean isTransCheck = false;
+    public static boolean isTranslateCheck = false;
 }

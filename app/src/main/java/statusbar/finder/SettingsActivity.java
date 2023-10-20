@@ -136,7 +136,7 @@ public class SettingsActivity extends FragmentActivity {
             implements Preference.OnPreferenceClickListener {
 
         private SwitchPreference mEnabledPreference;
-        private SwitchPreference mTrans;
+        private SwitchPreference mTranslate;
         private Preference mConnectionStatusPreference;
 
         @Override
@@ -153,7 +153,7 @@ public class SettingsActivity extends FragmentActivity {
             manager.cancelAll();
             mEnabledPreference = findPreference(Constants.PREFERENCE_KEY_ENABLED);
             mConnectionStatusPreference = findPreference(Constants.PREFERENCE_KEY_CONNECTION_STATUS);
-            mTrans = findPreference("trans");
+            mTranslate = findPreference(Constants.PREFERENCE_KEY_TRANSELATE);
 //            try {
 //                mNotificationFields[0] =
 //                        Notification.class.getDeclaredField("FLAG_ALWAYS_SHOW_TICKER").getInt(null);
@@ -177,9 +177,9 @@ public class SettingsActivity extends FragmentActivity {
                 }
                 mEnabledPreference.setOnPreferenceClickListener(this);
             }
-            if (mTrans != null) {
-                mTrans.setOnPreferenceClickListener(this);
-                Constants.isTransCheck = mTrans.isChecked();
+            if (mTranslate != null) {
+                mTranslate.setOnPreferenceClickListener(this);
+                Constants.isTranslateCheck = mTranslate.isChecked();
             }
             Preference appInfoPreference = findPreference("app");
             if (appInfoPreference != null) {
@@ -217,9 +217,8 @@ public class SettingsActivity extends FragmentActivity {
                 }
                 // 启动活动
                 return true;
-            } else if (preference == mTrans) {
-                Constants.isTransCheck = mTrans.isChecked();
-                Log.d("isTransCheck", String.valueOf(Constants.isTransCheck));
+            } else if (preference == mTranslate) {
+                Constants.isTranslateCheck = mTranslate.isChecked();
             } else {
                 String url = mUrlMap.get(preference.getKey());
                 if (TextUtils.isEmpty(url)) return false;

@@ -66,7 +66,7 @@ public class LrcGetter {
             return null;
         }
         String allLyrics;
-        if (Constants.isTransCheck) {
+        if (Constants.isTranslateCheck) {
             if (currentResult.mTranslatedLyric != null) {
                 allLyrics = LyricUtils.getAllLyrics(false, currentResult.mTranslatedLyric);
             } else {

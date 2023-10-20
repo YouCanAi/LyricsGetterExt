@@ -262,7 +262,7 @@ public class MusicListenerService extends NotificationListenerService {
             return;
         }
 
-        Lyric.Sentence sentence = LyricUtils.getSentence(mLyric.sentenceList, position);
+        Lyric.Sentence sentence = LyricUtils.getSentence(mLyric.sentenceList, position, 0, mLyric.offset);
         if (sentence == null) {
             return;
         }
@@ -272,7 +272,7 @@ public class MusicListenerService extends NotificationListenerService {
         if (sentence.fromTime != mLastSentenceFromTime) {
             if (Objects.equals(sentence.content, "")){return;}
             String curLyric = sentence.content.trim();
-            if (Constants.isTransCheck) { // 增添翻译
+            if (Constants.isTranslateCheck) { // 增添翻译
                 Lyric.Sentence transSentence = getTransSentence(position);
                 if (transSentence != null && !Objects.equals(transSentence.content, "") && !Objects.equals(sentence.content, "")) {
                     curLyric += "\n\r" + transSentence.content.trim();
@@ -289,10 +289,10 @@ public class MusicListenerService extends NotificationListenerService {
 
     private int calculateDelay(long position) {  // 计算Delay
         int delay = 0;
-        int nextfound = LyricUtils.getSentenceIndex(mLyric.sentenceList, position, 0, 0) + 1; // 获取下一句歌词的 Sentence
+        int nextFound = LyricUtils.getSentenceIndex(mLyric.sentenceList, position, 0, mLyric.offset) + 1; // 获取下一句歌词的 Sentence
 
-        if (nextfound < mLyric.sentenceList.size()) { //判断是否超出范围 防止崩溃
-            Lyric.Sentence nextSentence = mLyric.sentenceList.get(nextfound);
+        if (nextFound < mLyric.sentenceList.size()) { //判断是否超出范围 防止崩溃
+            Lyric.Sentence nextSentence = mLyric.sentenceList.get(nextFound);
             delay = (int) (nextSentence.fromTime - position) / 1000 / 4;
             if (delay < 0) {
                 delay = 0;
@@ -303,7 +303,7 @@ public class MusicListenerService extends NotificationListenerService {
     }
 
     private Lyric.Sentence getTransSentence(long position) {  // 获取翻译歌词
-        if (mLyric.transSentenceList.size() != 0) {
+        if (!mLyric.transSentenceList.isEmpty()) {
             return LyricUtils.getSentence(mLyric.transSentenceList, position);
         }
         return null;

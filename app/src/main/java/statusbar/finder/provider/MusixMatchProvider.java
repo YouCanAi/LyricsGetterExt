@@ -81,7 +81,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
                     result.mSource = "MusixMatch";
                 }
-                if (Constants.isTransCheck){result.mTranslatedLyric = getTransLyric(result.mLyric, trackId);};
+                if (Constants.isTranslateCheck){result.mTranslatedLyric = getTransLyric(result.mLyric, trackId);};
                 return result;
             }
         } catch (JSONException e) {
