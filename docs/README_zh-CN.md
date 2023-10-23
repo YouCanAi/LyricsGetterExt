@@ -5,7 +5,7 @@
     <p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · 扩展</p>
 </div>
 
-( [English](https://github.com/VictorModi/LyricsGetterExt/blob/main/README.md) / 简体中文 / [繁體中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/README_zh-TW.md) )
+( [English](https://github.com/VictorModi/LyricsGetterExt/blob/main/README.md) / 简体中文 / [繁體中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-TW.md) )
 
 # 这是什么 ?
 这是一个用于获取网络歌词的软件。
@@ -14,6 +14,11 @@
 
 基于 [KaguraRinko/StatusBarLyricExt](https://github.com/KaguraRinko/StatusBarLyricExt)。 但是我们移除了系统检测加入了 MusixMatch 歌词源且通过API适配了 [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) ! 
 (...以及...是的...我们还为它添加了一个图标...)
+
+# 注意
+如果你使用 Lyrics Getter 扩展 是为了使用状态栏歌词，请确保在你的设备上正确配置 StatusBarLyric。请在测试模式下成功 Hook 上状态栏，确保能够正常显示内容。
+
+[相关教程](https://blog.xiaowine.cc/posts/8e64/)
 
 # 如何使用 ?
 1. 确保 [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) 已经在正常工作以后前往你的 Xposed 管理器内对 [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) 勾选 [LyricsGetter Ext](https://github.com/VictorModi/LyricsGetterExt)。

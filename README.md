@@ -5,7 +5,7 @@
     <p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · Ext</p>
 </div>
 
-( English / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/README_zh-CN.md) / [繁體中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/README_zh-TW.md) )
+( English / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-CN.md) / [繁體中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-TW.md) )
 
 # What's this ?
 It's a program to get internet lyrics.

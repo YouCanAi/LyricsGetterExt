@@ -1,7 +1,9 @@
 package statusbar.finder;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,6 +22,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -187,6 +190,7 @@ public class MusicListenerService extends NotificationListenerService {
     public void onNotificationRemoved(StatusBarNotification sbn) {
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
@@ -273,12 +277,12 @@ public class MusicListenerService extends NotificationListenerService {
             if (Objects.equals(sentence.content, "")){return;}
             String curLyric = sentence.content.trim();
             if (Constants.isTranslateCheck) { // 增添翻译
-                Lyric.Sentence transSentence = getTransSentence(position);
+                Lyric.Sentence transSentence = getTranslatedSentence(position);
                 if (transSentence != null && !Objects.equals(transSentence.content, "") && !Objects.equals(sentence.content, "")) {
                     curLyric += "\n\r" + transSentence.content.trim();
                 }
             }
-
+            // Log.d("mLyric", mLyric.toString());
             EventTools.INSTANCE.sendLyric(getApplicationContext(), curLyric, true, drawBase64, false, "", getPackageName(), delay);
             mLyricNotification.tickerText = curLyric;
             mLyricNotification.when = System.currentTimeMillis();
@@ -302,9 +306,9 @@ public class MusicListenerService extends NotificationListenerService {
         return delay;
     }
 
-    private Lyric.Sentence getTransSentence(long position) {  // 获取翻译歌词
+    private Lyric.Sentence getTranslatedSentence(long position) {  // 获取翻译歌词
         if (!mLyric.transSentenceList.isEmpty()) {
-            return LyricUtils.getSentence(mLyric.transSentenceList, position);
+            return LyricUtils.getSentence(mLyric.transSentenceList, position, 0, mLyric.offset);
         }
         return null;
     }
@@ -335,5 +339,4 @@ public class MusicListenerService extends NotificationListenerService {
             handler.sendMessage(message);
         }
     }
-
 }

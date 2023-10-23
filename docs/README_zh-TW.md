@@ -6,7 +6,7 @@
 <p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · 擴充</p>
 </div>
 
-( [English](https://github.com/VictorModi/LyricsGetterExt/blob/main/README.md) / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/README_zh-CN.md) / 繁體中文 )
+( [English](https://github.com/VictorModi/LyricsGetterExt/blob/main/README.md) / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-CN.md) / 繁體中文 )
 
 # 這是什麼？
 這是一個用於獲取網絡歌詞的軟體。
@@ -15,6 +15,11 @@
 
 基於 [KaguraRinko/StatusBarLyricExt](https://github.com/KaguraRinko/StatusBarLyricExt)。但我們已經移除了系統檢測，加入了 MusixMatch 歌詞源並通過 API 適配了 Lyrics Getter！
 （還有...是的...我們還為它添加了一個圖標...）
+# 注意
+
+如果你使用 Lyrics Getter 擴充 是爲了使用狀態欄歌詞，請確認 [StatusBarLyric](https://github.com/Block-Network/StatusBarLyric) 在你的裝置上是否正確設定。是否在測試模式下成功 Hook 上狀態欄，能夠正常顯示內容。
+
+[相關教學](https://blog.xiaowine.cc/posts/8e64/)
 
 # 如何使用？
 1. 確保 Lyrics Getter 正常運行後，前往你的 Xposed 管理器，勾選 Lyrics Getter 擴展。
