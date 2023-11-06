@@ -53,6 +53,9 @@ public class MusixMatchProvider implements ILrcProvider {
                 long trackId = -1;
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
+                    if (lrcJson == null) {
+                        return null;
+                    }
                     result.mLyric = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle").getString("subtitle_body");
                     JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
                     trackId = infoJson.getLong("track_id");
@@ -71,6 +74,9 @@ public class MusixMatchProvider implements ILrcProvider {
                             artist,
                             album);
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(lrcUrl);
+                    if (lrcJson == null) {
+                        return null;
+                    }
                     JSONObject subTitleJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("track.subtitles.get").getJSONObject("message").getJSONObject("body").getJSONArray("subtitle_list").getJSONObject(0).getJSONObject("subtitle");
                     JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
                     result.mLyric = subTitleJson.getString("subtitle_body");
@@ -136,16 +142,15 @@ public class MusixMatchProvider implements ILrcProvider {
                 for (int curLyricLine = 0; curLyricLine < transList.length(); curLyricLine++) { // 获取每行的原歌词及翻译歌词
                     try {
                         JSONObject currentLyricLineObject = transList.getJSONObject(curLyricLine).getJSONObject("translation");
-                        String encodedSnippet = currentLyricLineObject.getString("snippet");
-                        String encodedDescription = currentLyricLineObject.getString("description");
-                        // 解码 Unicode
-                        String snippet = UnicodeUtil.unicodeStr2String(encodedSnippet);
-                        String description = UnicodeUtil.unicodeStr2String(encodedDescription);
+                        String snippet = UnicodeUtil.unicodeStr2String(currentLyricLineObject.getString("snippet"));
+                        String description = UnicodeUtil.unicodeStr2String(currentLyricLineObject.getString("description"));
                         for (String lyricLine : lyricText.split("\n")) {
                             String[] lyric = extractLyric(lyricLine); // 提取歌词
                             if (lyric != null) {
                                 if (Objects.equals(lyric[1], snippet)){
                                     modifiedLyricText.add("[" + lyric[0] + "] " + description);
+                                } else {
+                                    modifiedLyricText.add("[" + lyric[0] + "] ");
                                 }
                             }
                         }

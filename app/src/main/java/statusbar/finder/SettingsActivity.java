@@ -1,7 +1,5 @@
 package statusbar.finder;
 
-import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
-
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -14,7 +12,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -28,7 +25,7 @@ import androidx.preference.SwitchPreference;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.lyric.getter.api.tools.EventTools;
+import cn.lyric.getter.api.API;
 
 import statusbar.finder.misc.Constants;
 
@@ -165,16 +162,16 @@ public class SettingsActivity extends FragmentActivity {
 //                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
 //            }
 //            );
+            final boolean lyricsGetterApiHasEnable = new API(requireContext()).getHasEnable();
+            // boolean lyricsGetterApiHasEnable = true; For Debug
             if (mConnectionStatusPreference != null){
-                mConnectionStatusPreference.setSummary(String.valueOf(EventTools.INSTANCE.getHasEnable()));
+                mConnectionStatusPreference.setSummary(String.valueOf(lyricsGetterApiHasEnable));
                 mConnectionStatusPreference.setOnPreferenceClickListener(this);
             }
             if (mEnabledPreference != null) {
                 mEnabledPreference.setChecked(isNotificationListenerEnabled(getContext()));
-                if (!EventTools.INSTANCE.getHasEnable()){
-                    mEnabledPreference.setEnabled(false);
-                    mEnabledPreference.setChecked(false);
-                }
+                mEnabledPreference.setEnabled(lyricsGetterApiHasEnable);
+                mEnabledPreference.setEnabled(true);
                 mEnabledPreference.setOnPreferenceClickListener(this);
             }
             if (mTranslate != null) {

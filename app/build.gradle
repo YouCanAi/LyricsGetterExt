@@ -47,11 +47,11 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation group: 'com.github.houbb', name: 'opencc4j', version: '1.8.1'
     implementation group: 'io.github.kju2.languagedetector', name: 'language-detector', version: '1.0.5'
-    implementation 'com.github.xiaowine:Lyric-Getter-Api:5.0.5'
+    implementation 'com.github.xiaowine:Lyric-Getter-Api:V6-SNAPSHOT'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 repositories {

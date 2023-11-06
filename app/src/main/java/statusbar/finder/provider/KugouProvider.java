@@ -34,6 +34,9 @@ public class KugouProvider implements ILrcProvider {
                 Pair<String, Long> pair = getLrcUrl(array, data);
                 if(pair != null){
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
+                    if (lrcJson == null) {
+                        return null;
+                    }
                     LyricResult result = new LyricResult();
                     result.mLyric = unescapeHtml4(new String(Base64.decode(lrcJson.getString("content").getBytes(), Base64.DEFAULT)));
                     result.mDistance = pair.second;

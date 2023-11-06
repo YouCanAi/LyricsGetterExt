@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import cn.lyric.getter.api.API;
+import cn.lyric.getter.api.data.ExtraData;
 import cn.lyric.getter.api.tools.Tools;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
@@ -62,6 +64,7 @@ public class MusicListenerService extends NotificationListenerService {
     private static String systemLanguage;
     private String drawBase64;
     private Thread curLrcUpdateThread;
+    private API lyricsGetterApi;
 
     private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -194,6 +197,7 @@ public class MusicListenerService extends NotificationListenerService {
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
+        lyricsGetterApi = new API(getApplicationContext());
         systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
         drawBase64 = Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_statusbar_icon));
         // Log.d("systemLanguage", systemLanguage);
@@ -258,7 +262,7 @@ public class MusicListenerService extends NotificationListenerService {
     private void stopLyric() {
         mHandler.removeCallbacks(mLyricUpdateRunnable);
         mNotificationManager.cancel(NOTIFICATION_ID_LRC);
-        EventTools.INSTANCE.stopLyric(getApplicationContext());
+        lyricsGetterApi.clearLyric();
     }
 
     private void updateLyric(long position) {
@@ -282,8 +286,16 @@ public class MusicListenerService extends NotificationListenerService {
                     curLyric += "\n\r" + transSentence.content.trim();
                 }
             }
-            // Log.d("mLyric", mLyric.toString());
-            EventTools.INSTANCE.sendLyric(getApplicationContext(), curLyric, true, drawBase64, false, "", getPackageName(), delay);
+            // EventTools.INSTANCE.sendLyric(getApplicationContext(), curLyric, true, drawBase64, false, "", getPackageName(), delay);
+//            Log.d("updateLyric: ", String.format("Lyric: %s , delay: %d", curLyric, delay));
+//            Log.d("HasEnable", String.valueOf(lyricsGetterApi.getHasEnable()));
+            lyricsGetterApi.sendLyric(curLyric, new ExtraData(
+                    true,
+                    drawBase64,
+                    false,
+                    getPackageName(),
+                    delay
+            ));
             mLyricNotification.tickerText = curLyric;
             mLyricNotification.when = System.currentTimeMillis();
             mNotificationManager.notify(NOTIFICATION_ID_LRC, mLyricNotification);

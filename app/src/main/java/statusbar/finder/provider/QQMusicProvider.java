@@ -32,6 +32,9 @@ public class QQMusicProvider implements ILrcProvider {
                 Pair<String, Long> pair = getLrcUrl(array, data);
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first, QM_REFERER);
+                    if (lrcJson == null) {
+                        return null;
+                    }
                     LyricResult result = new LyricResult();
                     result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
                     result.mDistance = pair.second;

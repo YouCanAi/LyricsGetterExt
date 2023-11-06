@@ -10,4 +10,4 @@ This tutorial (file) is only a translation of the official tutorial from Chinese
 ## Preamble
 [StatusBarLyric](https://github.com/Block-Network/StatusBarLyric) 6.x has changed a lot compared to previous versions and is not available as soon as it is activated, it requires a simple configuration, which is described in the following tutorials.
 
-## <!-- TODO -->
+## <!-- TODO --> 
