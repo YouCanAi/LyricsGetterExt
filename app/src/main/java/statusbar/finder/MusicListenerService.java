@@ -278,7 +278,7 @@ public class MusicListenerService extends NotificationListenerService {
         int delay = calculateDelay(position);
 
         if (sentence.fromTime != mLastSentenceFromTime) {
-            if (Objects.equals(sentence.content, "")){return;}
+            if (sentence.content.isEmpty()){return;}
             String curLyric = sentence.content.trim();
             if (Constants.isTranslateCheck) { // 增添翻译
                 Lyric.Sentence transSentence = getTranslatedSentence(position);

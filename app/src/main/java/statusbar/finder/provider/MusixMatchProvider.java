@@ -6,6 +6,7 @@ import android.util.Pair;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +88,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
                     result.mSource = "MusixMatch";
                 }
-                if (Constants.isTranslateCheck){result.mTranslatedLyric = getTransLyric(result.mLyric, trackId);};
+                if (Constants.isTranslateCheck){result.mTranslatedLyric = getTranslatedLyric(result.mLyric, trackId);};
                 return result;
             }
         } catch (JSONException e) {
@@ -132,31 +133,40 @@ public class MusixMatchProvider implements ILrcProvider {
         }
     }
 
-    private String getTransLyric(String lyricText, long trackId) {
+    private String getTranslatedLyric(String lyricText, long trackId) {
         String[] languageOptions = {"zh", "tw"};
 
         for (String selectLang : languageOptions) {
-            JSONArray transList = getTranslationsList(trackId, selectLang);
+            JSONArray translateLyricsList = getTranslationsList(trackId, selectLang);
             List<String> modifiedLyricText = new ArrayList<>();
-            if (transList != null) {
-                for (int curLyricLine = 0; curLyricLine < transList.length(); curLyricLine++) { // 获取每行的原歌词及翻译歌词
-                    try {
-                        JSONObject currentLyricLineObject = transList.getJSONObject(curLyricLine).getJSONObject("translation");
-                        String snippet = UnicodeUtil.unicodeStr2String(currentLyricLineObject.getString("snippet"));
-                        String description = UnicodeUtil.unicodeStr2String(currentLyricLineObject.getString("description"));
-                        for (String lyricLine : lyricText.split("\n")) {
-                            String[] lyric = extractLyric(lyricLine); // 提取歌词
-                            if (lyric != null) {
-                                if (Objects.equals(lyric[1], snippet)){
-                                    modifiedLyricText.add("[" + lyric[0] + "] " + description);
-                                } else {
-                                    modifiedLyricText.add("[" + lyric[0] + "] ");
-                                }
-                            }
+            if (translateLyricsList != null) {
+                for (String lyricLine : lyricText.split("\n")) {
+                    boolean isMatched = false;
+                    String[] lyric = extractLyric(lyricLine);
+                    if (lyric == null) {
+                        continue;
+                    }
+                    for (int curLyricLine = 0; curLyricLine < translateLyricsList.length(); curLyricLine ++) {
+                        String snippet;
+                        String description;
+                        try {
+                            JSONObject curLyricObject = translateLyricsList.getJSONObject(curLyricLine).getJSONObject("translation");
+                            snippet = UnicodeUtil.unicodeStr2String(curLyricObject.getString("snippet"));
+                            description = UnicodeUtil.unicodeStr2String(curLyricObject.getString("description"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            return null;
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return null;
+
+                        if (Objects.equals(lyric[1], snippet)) {
+                            modifiedLyricText.add("[" + lyric[0] + "] " + description);
+                            isMatched = true;
+                            break;
+                        }
+                    }
+
+                    if (!isMatched) {
+                        modifiedLyricText.add("[" + lyric[0] + "]");
                     }
                 }
                 return String.join("\n", modifiedLyricText);
