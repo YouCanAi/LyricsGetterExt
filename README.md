@@ -35,3 +35,13 @@ It's base on [KaguraRinko/StatusBarLyricExt](https://github.com/KaguraRinko/Stat
 </div>
 
 4. Finally, if you are using more than one music app and one of the apps you are using has been adapted by [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter), the lyrics will be duplicated when you use that music app, to avoid this, please click `Input Ignored Apps Rules`, it will get the rules file from [Lyrics Getter](https://github.com/xiaowine/Lyric-Getter) and add all the apps in the rules file to the ignore list automatically, then you can avoid the problem of repeated lyrics output.
+
+## Star History
+
+<a href="https://star-history.com/#YouCanAi/LyricsGetterExt&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=YouCanAi/LyricsGetterExt&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=YouCanAi/LyricsGetterExt&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=YouCanAi/LyricsGetterExt&type=Date" />
+  </picture>
+</a>
