@@ -3,7 +3,6 @@ package statusbar.finder;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,7 +21,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -37,11 +35,11 @@ import java.util.Objects;
 import cn.lyric.getter.api.API;
 import cn.lyric.getter.api.data.ExtraData;
 import cn.lyric.getter.api.tools.Tools;
+
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
-import statusbar.finder.misc.Constants;
 
-import cn.lyric.getter.api.tools.EventTools;
+import statusbar.finder.misc.Constants;
 
 public class MusicListenerService extends NotificationListenerService {
 
@@ -61,7 +59,7 @@ public class MusicListenerService extends NotificationListenerService {
     private Notification mLyricNotification;
     private long mLastSentenceFromTime = -1;
 
-    private static String systemLanguage;
+    private final static String systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
     private String drawBase64;
     private Thread curLrcUpdateThread;
     private API lyricsGetterApi;
@@ -168,23 +166,17 @@ public class MusicListenerService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-//        StatusBarNotification statusBarNotification = sbn;
-//        Notification notification = statusBarNotification.getNotification();
-//            if (statusBarNotification.isClearable()){
+//        Notification notification = sbn.getNotification();
+//            if (sbn.isClearable()){
 //                if (notification != null) {
-//                    String title = notification.extras.getString(Notification.EXTRA_TITLE);
-//                    String text = notification.extras.getString(Notification.EXTRA_TEXT);
-//                    if(title != null || text != null) {
-//                        EventTools.INSTANCE.sendLyric(
-//                                getApplicationContext(),
-//                                title + " : " + text,
-//                                true,
-//                                Tools.INSTANCE.drawableToBase64(drawBase64),
-//                                false,
-//                                "",
-//                                getPackageName(), 1
-//                        );
-//                    }
+//                    String lyricText = String.format("%s : %s", notification.extras.getString(Notification.EXTRA_TITLE), notification.extras.getString(Notification.EXTRA_TEXT));
+//                    lyricsGetterApi.sendLyric(lyricText,new ExtraData(
+//                            true,
+//                            drawBase64,
+//                            false,
+//                            getPackageName(),
+//                            0
+//                    ));
 //                }
 //        }
     }
@@ -197,8 +189,7 @@ public class MusicListenerService extends NotificationListenerService {
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
-        lyricsGetterApi = new API(getApplicationContext());
-        systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+        lyricsGetterApi = new API();
         drawBase64 = Tools.INSTANCE.drawableToBase64(getDrawable(R.drawable.ic_statusbar_icon));
         // Log.d("systemLanguage", systemLanguage);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -309,7 +300,7 @@ public class MusicListenerService extends NotificationListenerService {
 
         if (nextFound < mLyric.sentenceList.size()) { //判断是否超出范围 防止崩溃
             Lyric.Sentence nextSentence = mLyric.sentenceList.get(nextFound);
-            delay = (int) (nextSentence.fromTime - position) / 1000 / 4;
+            delay = (int) (nextSentence.fromTime - position) / 1000 / 3;
             if (delay < 0) {
                 delay = 0;
             }

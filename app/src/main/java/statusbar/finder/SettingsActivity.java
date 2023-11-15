@@ -162,7 +162,7 @@ public class SettingsActivity extends FragmentActivity {
 //                mEnabledPreference.setSummary(R.string.unsupport_rom_summary);
 //            }
 //            );
-            final boolean lyricsGetterApiHasEnable = new API(requireContext()).getHasEnable();
+            final boolean lyricsGetterApiHasEnable = new API().getHasEnable();
             // boolean lyricsGetterApiHasEnable = true; For Debug
             if (mConnectionStatusPreference != null){
                 mConnectionStatusPreference.setSummary(String.valueOf(lyricsGetterApiHasEnable));
@@ -170,7 +170,7 @@ public class SettingsActivity extends FragmentActivity {
             }
             if (mEnabledPreference != null) {
                 mEnabledPreference.setChecked(isNotificationListenerEnabled(getContext()));
-                mEnabledPreference.setEnabled(lyricsGetterApiHasEnable);
+                // mEnabledPreference.setEnabled(lyricsGetterApiHasEnable);
                 mEnabledPreference.setEnabled(true);
                 mEnabledPreference.setOnPreferenceClickListener(this);
             }

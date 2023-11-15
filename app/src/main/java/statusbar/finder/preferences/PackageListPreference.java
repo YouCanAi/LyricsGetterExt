@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -150,7 +151,7 @@ public class PackageListPreference extends PreferenceCategory implements
     }
 
     private void addPackageToList(String packageName) {
-        if (!mPackages.contains(packageName)) {
+        if (!mPackages.contains(packageName) && !Objects.equals(packageName, mContext.getPackageName())) {
             mPackages.add(packageName);
             addPackageToPref(packageName);
             savePackagesList();
