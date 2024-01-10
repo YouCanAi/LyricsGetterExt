@@ -13,15 +13,13 @@ import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 import statusbar.finder.misc.checkStringLang;
+import statusbar.finder.provider.SimpleSongInfo;
 
 public class LyricSearchUtil {
 
     private static final Pattern LyricContentPattern = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d{0,3}]|\\[\\d\\d:\\d\\d])[^\\r\\n]");
 
-    public static String getSearchKey(MediaMetadata metadata) {
-        String title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String album = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        String artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+    public static String getSearchKey(String title, String artist, String album) {
         String ret;
 
         if (ZhConverterUtil.isTraditional(title)) {
@@ -55,6 +53,14 @@ public class LyricSearchUtil {
         }
     }
 
+    public static String getSearchKey(MediaMetadata metadata) {
+        return getSearchKey(metadata.getString(MediaMetadata.METADATA_KEY_TITLE), metadata.getString(MediaMetadata.METADATA_KEY_ALBUM), metadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
+    }
+
+    public static String getSearchKey(SimpleSongInfo simpleSongInfo) {
+        return getSearchKey(simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    }
+
     public static String parseArtists(JSONArray jsonArray, String key) {
         try {
             StringBuilder stringBuilder = new StringBuilder();
@@ -69,11 +75,7 @@ public class LyricSearchUtil {
         return null;
     }
 
-    public static long getMetadataDistance(MediaMetadata metadata, String title, String artist, String album) {
-        String realTitle = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String realArtist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String realAlbum = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-
+    public static long calculateSongInfoDistance(String realTitle, String realArtist, String realAlbum, String title, String artist, String album) {
         if (ZhConverterUtil.isTraditional(realTitle)) {
             if (!(checkStringLang.isJapanese(realTitle)))
                 realTitle = ZhConverterUtil.toSimple(realTitle);
@@ -94,6 +96,21 @@ public class LyricSearchUtil {
         res += levenshtein(artist, realArtist) * 10L;
         res += levenshtein(album, realAlbum);
         return res;
+    }
+
+    public static long calculateSongInfoDistance(SimpleSongInfo simpleSongInfo, String title, String artist, String album) {
+        return calculateSongInfoDistance(simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album, title, artist, album);
+    }
+
+    public static long calculateSongInfoDistance(MediaMetadata metadata, String title, String artist, String album) {
+        return calculateSongInfoDistance(
+                metadata.getString(MediaMetadata.METADATA_KEY_TITLE),
+                metadata.getString(MediaMetadata.METADATA_KEY_ARTIST),
+                metadata.getString(MediaMetadata.METADATA_KEY_ALBUM),
+                title,
+                artist,
+                album
+        );
     }
 
     public static int levenshtein(CharSequence a, CharSequence b) {

@@ -59,6 +59,7 @@ public class MusicListenerService extends NotificationListenerService {
     private Notification mLyricNotification;
     private long mLastSentenceFromTime = -1;
 
+    @SuppressLint("ConstantLocale")
     private final static String systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
     private String drawBase64;
     private Thread curLrcUpdateThread;
@@ -179,10 +180,6 @@ public class MusicListenerService extends NotificationListenerService {
 //                    ));
 //                }
 //        }
-    }
-
-    @Override
-    public void onNotificationRemoved(StatusBarNotification sbn) {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

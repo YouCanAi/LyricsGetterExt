@@ -2,13 +2,11 @@ package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
 
 public interface ILrcProvider {
     LyricResult getLyric(MediaMetadata data) throws IOException;
+    LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException;
 
     class LyricResult {
         public String mLyric;

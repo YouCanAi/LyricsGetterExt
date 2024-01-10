@@ -16,6 +16,9 @@ import java.util.Objects;
 import android.util.Log;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
+import com.github.houbb.opencc4j.core.ZhConvert;
+import com.moji4j.MojiConverter;
+import com.moji4j.MojiDetector;
 import statusbar.finder.LyricsDatabase;
 import statusbar.finder.misc.Constants;
 import statusbar.finder.provider.*;
@@ -63,7 +66,26 @@ public class LrcGetter {
             }
         }
         if  (currentResult == null) {
-            return null;
+            MojiDetector detector = new MojiDetector();
+            if (!detector.hasKana(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE)) && detector.hasLatin(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE))) {
+                SimpleSongInfo simpleSongInfo = new SimpleSongInfo(mediaMetadata);
+                simpleSongInfo.title = new MojiConverter().convertRomajiToHiragana(simpleSongInfo.title);
+                for (ILrcProvider provider : providers) {
+                    try {
+                        ILrcProvider.LyricResult lyricResult = provider.getLyric(simpleSongInfo);
+                        if (lyricResult != null) {
+                            if (LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
+                                currentResult = lyricResult;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if (currentResult == null) {
+                return null;
+            }
         }
         String allLyrics;
         if (Constants.isTranslateCheck) {

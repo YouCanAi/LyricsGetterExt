@@ -1,5 +1,7 @@
 package cn.zhaiyifan.lyric.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,24 +19,25 @@ public class Lyric {
     public List<Sentence> sentenceList = new ArrayList<Sentence>(100);
     public List<Sentence> transSentenceList = new ArrayList<Sentence>(100);
 
+    @NotNull
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Title: " + title + "\n")
-                .append("Artist: " + artist + "\n")
-                .append("Album: " + album + "\n")
-                .append("By: " + by + "\n")
-                .append("Author: " + author + "\n")
-                .append("Length: " + length + "\n")
-                .append("Offset: " + offset + "\n");
+        stringBuilder.append("Title: ").append(title).append("\n")
+                .append("Artist: ").append(artist).append("\n")
+                .append("Album: ").append(album).append("\n")
+                .append("By: ").append(by).append("\n")
+                .append("Author: ").append(author).append("\n")
+                .append("Length: ").append(length).append("\n")
+                .append("Offset: ").append(offset).append("\n");
         if (sentenceList != null) {
             for (Sentence sentence : sentenceList) {
-                stringBuilder.append(sentence.toString() + "\n");
+                stringBuilder.append(sentence.toString()).append("\n");
             }
         }
-        stringBuilder.append ("---Translate---\n");
         if (transSentenceList != null) {
+            stringBuilder.append ("--- Translate Lyrics ---\n");
             for (Sentence sentence : transSentenceList) {
-                stringBuilder.append(sentence.toString() + "\n");
+                stringBuilder.append(sentence.toString()).append("\n");
             }
         }
         return stringBuilder.toString();
@@ -51,7 +54,7 @@ public class Lyric {
         }
     }
 
-    public class Sentence {
+    public static class Sentence {
         public String content;
         public long fromTime;
 
@@ -60,8 +63,9 @@ public class Lyric {
             this.fromTime = fromTime;
         }
 
+        @NotNull
         public String toString() {
-            return String.valueOf(fromTime) + ": " + content;
+            return fromTime + ": " + content;
         }
     }
 }

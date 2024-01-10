@@ -31,6 +31,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +64,7 @@ public class PackageListPreference extends PreferenceCategory implements
 
     private static final String RULES_FULL_URL = "https://raw.githubusercontent.com/xiaowine/Lyric-Getter/master/app/src/main/assets/app_rules.json";
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public PackageListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -125,15 +126,7 @@ public class PackageListPreference extends PreferenceCategory implements
 
     private void savePackagesList() {
         String packageListData;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            packageListData = String.join(";", mPackages);
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String pkg : mPackages) {
-                sb.append(pkg).append(';');
-            }
-            packageListData = sb.toString();
-        }
+        packageListData = String.join(";", mPackages);
         persistString(packageListData);
         LocalBroadcastManager.getInstance(this.getContext()).sendBroadcast(new Intent(Constants.BROADCAST_IGNORED_APP_CHANGED));
     }
@@ -170,7 +163,7 @@ public class PackageListPreference extends PreferenceCategory implements
     }
 
     @Override
-    public boolean onPreferenceClick(Preference preference) {
+    public boolean onPreferenceClick(@NotNull Preference preference) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         if (preference == mAddPackagePref) {
             ListView appsList = new ListView(mContext);

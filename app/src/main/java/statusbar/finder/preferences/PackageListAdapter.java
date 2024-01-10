@@ -131,7 +131,7 @@ public class PackageListAdapter extends BaseAdapter implements Runnable {
         holder.title.setText(applicationInfo.title);
         holder.icon.setImageDrawable(applicationInfo.icon);
 
-        boolean needSummary = applicationInfo.activityTitles.size() > 0;
+        boolean needSummary = !applicationInfo.activityTitles.isEmpty();
         if (applicationInfo.activityTitles.size() == 1) {
             if (TextUtils.equals(applicationInfo.title, applicationInfo.activityTitles.first())) {
                 needSummary = false;

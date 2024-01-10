@@ -1,12 +1,10 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
-import android.util.Log;
 import android.util.Pair;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,22 +32,27 @@ public class MusixMatchProvider implements ILrcProvider {
     private static final String MUSIXMATCH_LRC_SERACH_URL_FORMAT = MUSIXMATCH_BASE_URL + "macro.subtitles.get?tags=playing&subtitle_format=lrc&usertoken=%s&q_track=%s&q_artist=%s&q_album=%s&app_id=android-player-v1.0&format=json";
     private static final String MUSIXMATCH_TRANSLATED_LRC_URL_FORMAT = MUSIXMATCH_BASE_URL + "crowd.track.translations.get?usertoken=%s&translation_fields_set=minimal&selected_language=%s&track_id=%d&comment_format=text&part=user&format=json&app_id=android-player-v1.0&tags=playing";
     private static String MUSIXMATCH_USERTOKEN;
-    
+
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
+        return getLyric(new SimpleSongInfo(data));
+    }
+
+    @Override
+    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
         if (MUSIXMATCH_USERTOKEN  == null) {
             MUSIXMATCH_USERTOKEN = getMusixMatchUserToken("");
             if (MUSIXMATCH_USERTOKEN  == null) {
                 return null;
             }
         }
-        String searchUrl = String.format(Locale.getDefault(), MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(data));
+        String searchUrl = String.format(Locale.getDefault(), MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(simpleSongInfo));
         JSONObject searchResult;
         try{
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
             if (searchResult != null && searchResult.getJSONObject("message").getJSONObject("header").getLong("status_code") == 200) {
                 JSONArray array = searchResult.getJSONObject("message").getJSONObject("body").getJSONObject("macro_result_list").getJSONArray("track_list");
-                Pair<String, Long> pair = getLrcUrl(array, data);
+                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
                 LyricResult result = new LyricResult();
                 long trackId = -1;
                 if (pair != null) {
@@ -66,9 +69,9 @@ public class MusixMatchProvider implements ILrcProvider {
                     // 无法通过 id 寻找到歌词时
                     // 则尝试使用直接搜索歌词的方法
                     String lrcUrl;
-                    String track = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_TITLE));
-                    String artist = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ARTIST));
-                    String album = toSimpleURLEncode(data.getString(MediaMetadata.METADATA_KEY_ALBUM));
+                    String track = toSimpleURLEncode(simpleSongInfo.title);
+                    String artist = toSimpleURLEncode(simpleSongInfo.artist);
+                    String album = toSimpleURLEncode(simpleSongInfo.album);
                     lrcUrl = String.format(Locale.getDefault(), MUSIXMATCH_LRC_SERACH_URL_FORMAT,
                             MUSIXMATCH_USERTOKEN,
                             track,
@@ -85,7 +88,7 @@ public class MusixMatchProvider implements ILrcProvider {
                     String albumName = infoJson.getString("album_name");
                     String artistName = infoJson.getString("artist_name");
                     trackId = infoJson.getLong("track_id");
-                    result.mDistance = LyricSearchUtil.getMetadataDistance(data, soundName, artistName, albumName);
+                    result.mDistance = LyricSearchUtil.calculateSongInfoDistance(simpleSongInfo, soundName, artistName, albumName);
                     result.mSource = "MusixMatch";
                 }
                 if (Constants.isTranslateCheck){result.mTranslatedLyric = getTranslatedLyric(result.mLyric, trackId);};
@@ -98,7 +101,15 @@ public class MusixMatchProvider implements ILrcProvider {
         return null;
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, MediaMetadata mediaMetadata) throws JSONException {
+//    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, MediaMetadata mediaMetadata) throws JSONException {
+//        return getLrcUrl(jsonArray, mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
+//    }
+
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
+        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    }
+
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
         long currentID = -1;
         long minDistance = 100000;
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -106,7 +117,7 @@ public class MusixMatchProvider implements ILrcProvider {
             String soundName = jsonObject.getString("track_name");
             String albumName = jsonObject.getString("album_name");
             String artistName = jsonObject.getString("artist_name");
-            long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, artistName, albumName);
+            long dis = LyricSearchUtil.calculateSongInfoDistance(songTitle, songArtist, songAlbum, soundName, artistName, albumName);
             if (dis <= minDistance) {
                 minDistance = dis;
                 currentID = jsonObject.getLong("track_id");
@@ -225,5 +236,4 @@ public class MusixMatchProvider implements ILrcProvider {
         }
         return result;
     }
-
 }

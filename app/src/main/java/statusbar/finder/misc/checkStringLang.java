@@ -1,7 +1,7 @@
 package statusbar.finder.misc;
 
-import java.io.UnsupportedEncodingException;
-import java.util.regex.*;
+import com.moji4j.MojiDetector;
+
 public class checkStringLang {
 
 //    public static boolean isJapenese(String text) {
@@ -20,20 +20,7 @@ public class checkStringLang {
 //        return false;
 //    }
 
-//    public static boolean isJapanese(String text) {
-//        // 为了避免误判中文
-//        // 本方法只检测平假名与片假名
-//        // 没有平假名与片假名的日文仍会返回false
-//
-//        Pattern pattern = Pattern.compile("[ぁ-んァ-ン]+");
-//        return pattern.matcher(text).find();
-//    }
-
-    public static boolean isJapanese(String text) {
-        try {
-            return text.getBytes("shift-jis").length >= (2 * text.length());
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
+    public static boolean isJapanese(String str) {
+        return new MojiDetector().hasKana(str);
     }
 }

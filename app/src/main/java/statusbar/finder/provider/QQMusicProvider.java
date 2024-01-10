@@ -23,13 +23,18 @@ public class QQMusicProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        String searchUrl = String.format(Locale.getDefault(), QM_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(data));
+        return getLyric(new SimpleSongInfo(data));
+    }
+
+    @Override
+    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
+        String searchUrl = String.format(Locale.getDefault(), QM_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo));
         JSONObject searchResult;
         try {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl, QM_REFERER);
             if (searchResult != null && searchResult.getLong("code") == 0) {
                 JSONArray array = searchResult.getJSONObject("data").getJSONObject("song").getJSONArray("list");
-                Pair<String, Long> pair = getLrcUrl(array, data);
+                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first, QM_REFERER);
                     if (lrcJson == null) {
@@ -51,7 +56,11 @@ public class QQMusicProvider implements ILrcProvider {
         return null;
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, MediaMetadata mediaMetadata) throws JSONException {
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
+        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    }
+
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
         String currentMID = "";
         long minDistance = 10000;
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -59,7 +68,7 @@ public class QQMusicProvider implements ILrcProvider {
             String soundName = jsonObject.getString("songname");
             String albumName = jsonObject.getString("albumname");
             JSONArray singers = jsonObject.getJSONArray("singer");
-            long dis = LyricSearchUtil.getMetadataDistance(mediaMetadata, soundName, LyricSearchUtil.parseArtists(singers, "name"), albumName);
+            long dis = LyricSearchUtil.calculateSongInfoDistance(songTitle, songArtist, songAlbum, soundName, LyricSearchUtil.parseArtists(singers, "name"), albumName);
             if (dis < minDistance) {
                 minDistance = dis;
                 currentMID = jsonObject.getString("songmid");
