@@ -1,6 +1,9 @@
 package statusbar.finder.provider;
 
+import android.annotation.SuppressLint;
 import android.media.MediaMetadata;
+
+import java.util.Locale;
 
 public class SimpleSongInfo {
     public String title;
@@ -29,5 +32,10 @@ public class SimpleSongInfo {
         if (this.album == null) {
             this.album = "";
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(),"title: %s\nartist: %s\nalbum: %s\nduration: %d", title, artist, album, duration);
     }
 }
