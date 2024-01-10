@@ -1,5 +1,7 @@
 # LyricsGetterExt
 
+# This repository is currently on hold for reasons related to the author and other external factors.
+
 <div style="margin-top: 25px;display: flex; flex-direction: column; align-items: center;">
     <img src="https://raw.githubusercontent.com/VictorModi/LyricsGetterExt/main/icon.svg" alt="icon" width="150">
     <p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · Ext</p>
