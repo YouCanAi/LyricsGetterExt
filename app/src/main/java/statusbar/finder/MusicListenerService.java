@@ -21,6 +21,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -275,7 +276,7 @@ public class MusicListenerService extends NotificationListenerService {
                 }
             }
             // EventTools.INSTANCE.sendLyric(getApplicationContext(), curLyric, true, drawBase64, false, "", getPackageName(), delay);
-//            Log.d("updateLyric: ", String.format("Lyric: %s , delay: %d", curLyric, delay));
+            Log.d("updateLyric: ", String.format("Lyric: %s , delay: %d", curLyric, delay));
 //            Log.d("HasEnable", String.valueOf(lyricsGetterApi.getHasEnable()));
             lyricsGetterApi.sendLyric(curLyric, new ExtraData(
                     true,

@@ -30,7 +30,7 @@ public class KugouProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
-        String searchUrl = String.format(Locale.getDefault(), KUGOU_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo));
+        String searchUrl = String.format(Locale.getDefault(), KUGOU_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo), simpleSongInfo.duration);
         JSONObject searchResult;
         try {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);

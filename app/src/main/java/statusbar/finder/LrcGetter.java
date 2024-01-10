@@ -39,7 +39,7 @@ public class LrcGetter {
 
     public static Lyric getLyric(Context context, MediaMetadata mediaMetadata, String sysLang) {
         LyricsDatabase lyricsDatabase = new LyricsDatabase(context);
-        Log.d(TAG, "curMediaData" + new SimpleSongInfo(mediaMetadata));
+        // Log.d(TAG, "curMediaData" + new SimpleSongInfo(mediaMetadata));
         if (messageDigest == null) {
             try {
                 messageDigest = MessageDigest.getInstance("SHA");
@@ -59,7 +59,7 @@ public class LrcGetter {
             if (!detector.hasKana(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE)) && detector.hasLatin(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE))) {
                 SimpleSongInfo simpleSongInfo = new SimpleSongInfo(mediaMetadata);
                 simpleSongInfo.title = new MojiConverter().convertRomajiToHiragana(simpleSongInfo.title);
-                Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
+                // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
                 currentResult = searchLyricsResultByInfo(simpleSongInfo);
             }
             if (currentResult == null) {
