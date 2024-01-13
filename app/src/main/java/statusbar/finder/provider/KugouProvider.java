@@ -1,6 +1,5 @@
 package statusbar.finder.provider;
 
-import static org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4;
 
 import android.media.MediaMetadata;
 
@@ -17,6 +16,8 @@ import android.util.Pair;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
 
+import static org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4;
+
 public class KugouProvider implements ILrcProvider {
 
     private static final String KUGOU_BASE_URL = "https://lyrics.kugou.com/";
@@ -25,18 +26,18 @@ public class KugouProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        return getLyric(new SimpleSongInfo(data));
+        return getLyric(new ILrcProvider.MediaInfo(data));
     }
 
     @Override
-    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
-        String searchUrl = String.format(Locale.getDefault(), KUGOU_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo), simpleSongInfo.duration);
+    public LyricResult getLyric(ILrcProvider.MediaInfo mediaInfo) throws IOException {
+        String searchUrl = String.format(Locale.getDefault(), KUGOU_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(mediaInfo), mediaInfo.duration);
         JSONObject searchResult;
         try {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
             if (searchResult != null && searchResult.getLong("status") == 200) {
                 JSONArray array = searchResult.getJSONArray("candidates");
-                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
+                Pair<String, Long> pair = getLrcUrl(array, mediaInfo);
                 if(pair != null){
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     if (lrcJson == null) {
@@ -46,6 +47,7 @@ public class KugouProvider implements ILrcProvider {
                     result.mLyric = unescapeHtml4(new String(Base64.decode(lrcJson.getString("content").getBytes(), Base64.DEFAULT)));
                     result.mDistance = pair.second;
                     result.mSource = "Kugou";
+                    result.realInfo = mediaInfo;
                     return result;
                 } else {
                     return null;
@@ -62,8 +64,8 @@ public class KugouProvider implements ILrcProvider {
 //        return getLrcUrl(jsonArray, mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
 //    }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
-        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
+        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {

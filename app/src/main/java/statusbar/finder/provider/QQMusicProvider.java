@@ -23,18 +23,18 @@ public class QQMusicProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        return getLyric(new SimpleSongInfo(data));
+        return getLyric(new ILrcProvider.MediaInfo(data));
     }
 
     @Override
-    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
-        String searchUrl = String.format(Locale.getDefault(), QM_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo));
+    public LyricResult getLyric(ILrcProvider.MediaInfo mediaInfo) throws IOException {
+        String searchUrl = String.format(Locale.getDefault(), QM_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(mediaInfo));
         JSONObject searchResult;
         try {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl, QM_REFERER);
             if (searchResult != null && searchResult.getLong("code") == 0) {
                 JSONArray array = searchResult.getJSONObject("data").getJSONObject("song").getJSONArray("list");
-                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
+                Pair<String, Long> pair = getLrcUrl(array, mediaInfo);
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first, QM_REFERER);
                     if (lrcJson == null) {
@@ -44,6 +44,7 @@ public class QQMusicProvider implements ILrcProvider {
                     result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
                     result.mDistance = pair.second;
                     result.mSource = "QQ";
+                    result.realInfo = mediaInfo;
                     return result;
                 } else {
                     return null;
@@ -56,8 +57,8 @@ public class QQMusicProvider implements ILrcProvider {
         return null;
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
-        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
+        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {

@@ -61,7 +61,7 @@ public class MusicListenerService extends NotificationListenerService {
     private long mLastSentenceFromTime = -1;
 
     @SuppressLint("ConstantLocale")
-    private final static String systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+    public final static String systemLanguage = Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
     private String drawBase64;
     private Thread curLrcUpdateThread;
     private API lyricsGetterApi;
@@ -315,7 +315,7 @@ public class MusicListenerService extends NotificationListenerService {
     }
 
 
-    private static class LrcUpdateThread extends Thread {
+    public static class LrcUpdateThread extends Thread {
         private final Handler handler;
         private final MediaMetadata data;
         private final Context context;

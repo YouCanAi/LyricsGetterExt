@@ -1,25 +1,17 @@
 package statusbar.finder;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.database.Cursor;
 import android.media.MediaMetadata;
-import android.database.sqlite.SQLiteDatabase;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-import android.util.Log;
 import cn.zhaiyifan.lyric.LyricUtils;
 import cn.zhaiyifan.lyric.model.Lyric;
-import com.github.houbb.opencc4j.core.ZhConvert;
 import com.moji4j.MojiConverter;
 import com.moji4j.MojiDetector;
-import statusbar.finder.LyricsDatabase;
 import statusbar.finder.misc.Constants;
 import statusbar.finder.provider.*;
 import statusbar.finder.provider.utils.LyricSearchUtil;
@@ -56,13 +48,25 @@ public class LrcGetter {
         currentResult = searchLyricsResultByInfo(mediaMetadata);
         if  (currentResult == null) {
             MojiDetector detector = new MojiDetector();
+            MojiConverter converter = new MojiConverter();
             if (!detector.hasKana(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE)) && detector.hasLatin(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE))) {
-                SimpleSongInfo simpleSongInfo = new SimpleSongInfo(mediaMetadata);
-                simpleSongInfo.title = new MojiConverter().convertRomajiToHiragana(simpleSongInfo.title);
+                ILrcProvider.MediaInfo mediaInfo = new ILrcProvider.MediaInfo(mediaMetadata);
+                mediaInfo.title = converter.convertRomajiToHiragana(mediaInfo.title);
+                if (detector.hasLatin(mediaInfo.title)) {
+                    return null;
+                }
                 // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
-                currentResult = searchLyricsResultByInfo(simpleSongInfo);
+                currentResult = searchLyricsResultByInfo(mediaInfo);
+
+                if (currentResult == null) {
+                    mediaInfo.title = converter.convertRomajiToKatakana(mediaInfo.title);
+                    // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
+                    currentResult = searchLyricsResultByInfo(mediaInfo);
+                }
+
             }
             if (currentResult == null) {
+                lyricsDatabase.insertLyricIntoDatabase(null, mediaMetadata);
                 return null;
             }
         }
@@ -98,14 +102,14 @@ public class LrcGetter {
     }
 
     private static ILrcProvider.LyricResult searchLyricsResultByInfo(MediaMetadata mediaMetadata) {
-        return searchLyricsResultByInfo(new SimpleSongInfo(mediaMetadata));
+        return searchLyricsResultByInfo(new ILrcProvider.MediaInfo(mediaMetadata));
     }
 
-    private static ILrcProvider.LyricResult searchLyricsResultByInfo(SimpleSongInfo simpleSongInfo) {
+    private static ILrcProvider.LyricResult searchLyricsResultByInfo(ILrcProvider.MediaInfo mediaInfo) {
         ILrcProvider.LyricResult currentResult = null;
         for (ILrcProvider provider : providers) {
             try {
-                ILrcProvider.LyricResult lyricResult = provider.getLyric(simpleSongInfo);
+                ILrcProvider.LyricResult lyricResult = provider.getLyric(mediaInfo);
                 if (lyricResult != null) {
                     if (LyricSearchUtil.isLyricContent(lyricResult.mLyric) && (currentResult == null || currentResult.mDistance > lyricResult.mDistance)) {
                         currentResult = lyricResult;

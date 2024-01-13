@@ -1,6 +1,7 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
+import android.util.Log;
 import android.util.Pair;
 
 import org.json.JSONArray;
@@ -22,18 +23,19 @@ public class NeteaseProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        return getLyric(new SimpleSongInfo(data));
+        return getLyric(new ILrcProvider.MediaInfo(data));
     }
 
     @Override
-    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
-        String searchUrl = String.format(NETEASE_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(simpleSongInfo));
+    public LyricResult getLyric(ILrcProvider.MediaInfo mediaInfo) throws IOException {
+        String searchUrl = String.format(NETEASE_SEARCH_URL_FORMAT, LyricSearchUtil.getSearchKey(mediaInfo));
+        Log.d("searchUrl", searchUrl);
         JSONObject searchResult;
         try {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
             if (searchResult != null && searchResult.getLong("code") == 200) {
                 JSONArray array = searchResult.getJSONObject("result").getJSONArray("songs");
-                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
+                Pair<String, Long> pair = getLrcUrl(array, mediaInfo);
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     if (lrcJson == null) {
@@ -48,6 +50,7 @@ public class NeteaseProvider implements ILrcProvider {
                     }
                     result.mDistance = pair.second;
                     result.mSource = "Netease";
+                    result.realInfo = mediaInfo;
                     return result;
                 } else {
                     return null;
@@ -60,8 +63,8 @@ public class NeteaseProvider implements ILrcProvider {
         return null;
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
-        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
+        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {

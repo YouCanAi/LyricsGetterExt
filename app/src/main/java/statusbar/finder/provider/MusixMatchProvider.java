@@ -1,10 +1,13 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
+import android.os.Build;
+import android.util.Log;
 import android.util.Pair;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +15,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -35,27 +39,30 @@ public class MusixMatchProvider implements ILrcProvider {
 
     @Override
     public LyricResult getLyric(MediaMetadata data) throws IOException {
-        return getLyric(new SimpleSongInfo(data));
+        return getLyric(new ILrcProvider.MediaInfo(data));
     }
 
     @Override
-    public LyricResult getLyric(SimpleSongInfo simpleSongInfo) throws IOException {
+    public LyricResult getLyric(ILrcProvider.MediaInfo mediaInfo) throws IOException {
         if (MUSIXMATCH_USERTOKEN  == null) {
             MUSIXMATCH_USERTOKEN = getMusixMatchUserToken("");
             if (MUSIXMATCH_USERTOKEN  == null) {
                 return null;
             }
         }
-        String searchUrl = String.format(Locale.getDefault(), MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(simpleSongInfo));
+        String searchUrl = String.format(Locale.getDefault(), MUSIXMATCH_SERACH_URL_FORMAT, MUSIXMATCH_USERTOKEN , LyricSearchUtil.getSearchKey(mediaInfo));
         JSONObject searchResult;
         try{
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
+            Log.d("searchUrl", searchUrl);
             if (searchResult != null && searchResult.getJSONObject("message").getJSONObject("header").getLong("status_code") == 200) {
                 JSONArray array = searchResult.getJSONObject("message").getJSONObject("body").getJSONObject("macro_result_list").getJSONArray("track_list");
-                Pair<String, Long> pair = getLrcUrl(array, simpleSongInfo);
+                Pair<String, Long> pair = getLrcUrl(array, mediaInfo);
+                Log.d("pair", String.valueOf(pair));
                 LyricResult result = new LyricResult();
                 long trackId = -1;
                 if (pair != null) {
+                    Log.d("pair.first", pair.first);
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     if (lrcJson == null) {
                         return null;
@@ -64,19 +71,19 @@ public class MusixMatchProvider implements ILrcProvider {
                     JSONObject infoJson = lrcJson.getJSONObject("message").getJSONObject("body").getJSONObject("macro_calls").getJSONObject("matcher.track.get").getJSONObject("message").getJSONObject("body").getJSONObject("track");
                     trackId = infoJson.getLong("track_id");
                     result.mDistance = pair.second;
-                    result.mSource = "MusixMatch";
                 } else {
                     // 无法通过 id 寻找到歌词时
                     // 则尝试使用直接搜索歌词的方法
                     String lrcUrl;
-                    String track = toSimpleURLEncode(simpleSongInfo.title);
-                    String artist = toSimpleURLEncode(simpleSongInfo.artist);
-                    String album = toSimpleURLEncode(simpleSongInfo.album);
+                    String track = toSimpleURLEncode(mediaInfo.title);
+                    String artist = toSimpleURLEncode(mediaInfo.artist);
+                    String album = toSimpleURLEncode(mediaInfo.album);
                     lrcUrl = String.format(Locale.getDefault(), MUSIXMATCH_LRC_SERACH_URL_FORMAT,
                             MUSIXMATCH_USERTOKEN,
                             track,
                             artist,
                             album);
+                    Log.d("lrcUrl", lrcUrl);
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(lrcUrl);
                     if (lrcJson == null) {
                         return null;
@@ -88,9 +95,10 @@ public class MusixMatchProvider implements ILrcProvider {
                     String albumName = infoJson.getString("album_name");
                     String artistName = infoJson.getString("artist_name");
                     trackId = infoJson.getLong("track_id");
-                    result.mDistance = LyricSearchUtil.calculateSongInfoDistance(simpleSongInfo, soundName, artistName, albumName);
-                    result.mSource = "MusixMatch";
+                    result.mDistance = LyricSearchUtil.calculateSongInfoDistance(mediaInfo, soundName, artistName, albumName);
                 }
+                result.realInfo = mediaInfo;
+                result.mSource = "MusixMatch";
                 if (Constants.isTranslateCheck){result.mTranslatedLyric = getTranslatedLyric(result.mLyric, trackId);};
                 return result;
             }
@@ -105,8 +113,8 @@ public class MusixMatchProvider implements ILrcProvider {
 //        return getLrcUrl(jsonArray, mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM), mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
 //    }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, SimpleSongInfo simpleSongInfo) throws JSONException {
-        return getLrcUrl(jsonArray, simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
+        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
@@ -133,10 +141,14 @@ public class MusixMatchProvider implements ILrcProvider {
             if (!checkStringLang.isJapanese(input)) {
                 result = ZhConverterUtil.toSimple(result);
             }
-            try {
-                URLEncoder.encode(result, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                return null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                result = URLEncoder.encode(result, StandardCharsets.UTF_8);
+            } else {
+                try {
+                    result = URLEncoder.encode(result, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    return null;
+                }
             }
             return result;
         } else {

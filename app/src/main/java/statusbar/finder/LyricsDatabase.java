@@ -52,9 +52,20 @@ public class LyricsDatabase extends SQLiteOpenHelper {
         String query = "INSERT INTO Lyrics (song, artist, album, duration, distance, lyric, translated_lyric, lyric_source, _offset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
+        if (lyricResult == null) {
+            try {
+                db.execSQL(query, new Object[]{song, artist, album, duration, 0, "", "", "Local", 0});
+                db.setTransactionSuccessful();
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+                db.endTransaction();
+            }
+        }
         try {
             db.execSQL(query, new Object[]{song, artist, album, duration, lyricResult.mDistance, lyricResult.mLyric, lyricResult.mTranslatedLyric, lyricResult.mSource, lyricResult.mOffset});
-
             db.setTransactionSuccessful();
             return true;
         } catch (Exception e) {
@@ -107,5 +118,9 @@ public class LyricsDatabase extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // 更新数据表结构后在此处添加内容
+    }
+
+    class LyricsSearchCondition {
+
     }
 }

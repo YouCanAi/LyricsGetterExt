@@ -1,6 +1,7 @@
 package statusbar.finder.provider.utils;
 
 import android.media.MediaMetadata;
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
@@ -10,30 +11,28 @@ import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import statusbar.finder.misc.checkStringLang;
-import statusbar.finder.provider.SimpleSongInfo;
+import statusbar.finder.provider.ILrcProvider;
 
 public class LyricSearchUtil {
 
     private static final Pattern LyricContentPattern = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d{0,3}]|\\[\\d\\d:\\d\\d])[^\\r\\n]");
 
+    private static void convertIfNecessary(String input) {
+        if (ZhConverterUtil.isTraditional(input) && !(checkStringLang.isJapanese(input))) {
+            input = ZhConverterUtil.toSimple(input);
+        }
+    }
+
     public static String getSearchKey(String title, String artist, String album) {
         String ret;
 
-        if (ZhConverterUtil.isTraditional(title)) {
-            if (!(checkStringLang.isJapanese(title)))
-                title = ZhConverterUtil.toSimple(title);
-        }
-        if (ZhConverterUtil.isTraditional(artist)) {
-            if (!(checkStringLang.isJapanese(artist)))
-                artist = ZhConverterUtil.toSimple(artist);
-        }
-        if (ZhConverterUtil.isTraditional(album)) {
-            if (!(checkStringLang.isJapanese(album)))
-                album = ZhConverterUtil.toSimple(album);
-        }
+        convertIfNecessary(title);
+        convertIfNecessary(artist);
+        convertIfNecessary(album);
 
         if (!TextUtils.isEmpty(artist)) {
             ret = artist + "-" + title;
@@ -43,6 +42,9 @@ public class LyricSearchUtil {
             ret = title;
         }
         if (!TextUtils.isEmpty(ret)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                return URLEncoder.encode(ret, StandardCharsets.UTF_8);
+            }
             try {
                 return URLEncoder.encode(ret, "UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -57,8 +59,8 @@ public class LyricSearchUtil {
         return getSearchKey(metadata.getString(MediaMetadata.METADATA_KEY_TITLE), metadata.getString(MediaMetadata.METADATA_KEY_ALBUM), metadata.getString(MediaMetadata.METADATA_KEY_ARTIST));
     }
 
-    public static String getSearchKey(SimpleSongInfo simpleSongInfo) {
-        return getSearchKey(simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album);
+    public static String getSearchKey(ILrcProvider.MediaInfo mediaInfo) {
+        return getSearchKey(mediaInfo.title, mediaInfo.artist, mediaInfo.album);
     }
 
     public static String parseArtists(JSONArray jsonArray, String key) {
@@ -98,8 +100,8 @@ public class LyricSearchUtil {
         return res;
     }
 
-    public static long calculateSongInfoDistance(SimpleSongInfo simpleSongInfo, String title, String artist, String album) {
-        return calculateSongInfoDistance(simpleSongInfo.title, simpleSongInfo.artist, simpleSongInfo.album, title, artist, album);
+    public static long calculateSongInfoDistance(ILrcProvider.MediaInfo mediaInfo, String title, String artist, String album) {
+        return calculateSongInfoDistance(mediaInfo.title, mediaInfo.artist, mediaInfo.album, title, artist, album);
     }
 
     public static long calculateSongInfoDistance(MediaMetadata metadata, String title, String artist, String album) {
