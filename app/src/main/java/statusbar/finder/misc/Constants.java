@@ -14,7 +14,7 @@ public class Constants {
     public static final int FLAG_ALWAYS_SHOW_TICKER = 0x1000000;
     public static final int FLAG_ONLY_UPDATE_TICKER = 0x2000000;
 
-    public static final String BROADCAST_IGNORED_APP_CHANGED = "ignored_app_changed";
+    public static final String BROADCAST_TARGET_APP_CHANGED = "target_app_changed";
 
     public static final String SETTINGS_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
     public static boolean isTranslateCheck = false;

@@ -14,9 +14,11 @@ import java.util.Locale;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
 
-@Deprecated(since = "Can't Work")
+/**
+ * @deprecated Can't Work.
+ */
+@Deprecated(since = "1.0.7")
 public class QQMusicProvider implements ILrcProvider {
-
     private static final String QM_BASE_URL = "https://c.y.qq.com/";
     private static final String QM_REFERER = "https://y.qq.com";
     private static final String QM_SEARCH_URL_FORMAT = QM_BASE_URL + "soso/fcgi-bin/client_search_cp?w=%s&format=json";
@@ -45,7 +47,7 @@ public class QQMusicProvider implements ILrcProvider {
                     result.mLyric = new String(Base64.decode(lrcJson.getString("lyric").getBytes(), Base64.DEFAULT));
                     result.mDistance = pair.second;
                     result.mSource = "QQ";
-                    result.realInfo = mediaInfo;
+                    result.resultInfo = mediaInfo; // 错误的使用方式，但目前整个类不可用，先这样，哪天更新再改。
                     return result;
                 } else {
                     return null;

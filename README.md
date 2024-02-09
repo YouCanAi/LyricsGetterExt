@@ -1,10 +1,8 @@
 # LyricsGetterExt
 
-# This repository is currently on hold for reasons related to the author and other external factors.
-
-<div style="margin-top: 25px;display: flex; flex-direction: column; align-items: center;">
+<div align="center">
     <img src="https://raw.githubusercontent.com/VictorModi/LyricsGetterExt/main/icon.svg" alt="icon" width="150">
-    <p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · Ext</p>
+    <p>Lyrics Getter · Ext</p>
 </div>
 
 ( English / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-CN.md) / [繁體中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-TW.md) )

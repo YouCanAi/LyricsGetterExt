@@ -25,13 +25,18 @@ public class LrcGetter {
             new MusixMatchProvider(),
             new NeteaseProvider(),
             new KugouProvider(),
-            // new QQMusicProvider(), Can't working.
+            new QQMusicProvider()
     };
     private static MessageDigest messageDigest;
 
-    public static Lyric getLyric(Context context, MediaMetadata mediaMetadata, String sysLang) {
+    public static Lyric getLyric(Context context, MediaMetadata mediaMetadata, String sysLang, String packageName) {
+        return getLyric(context, new ILrcProvider.MediaInfo(mediaMetadata), sysLang, packageName);
+    }
+
+    public static Lyric getLyric(Context context, ILrcProvider.MediaInfo mediaInfo, String sysLang, String packageName) {
         LyricsDatabase lyricsDatabase = new LyricsDatabase(context);
         // Log.d(TAG, "curMediaData" + new SimpleSongInfo(mediaMetadata));
+        ILrcProvider.MediaInfo hiraganaMediaInfo = null;
         if (messageDigest == null) {
             try {
                 messageDigest = MessageDigest.getInstance("SHA");
@@ -41,22 +46,26 @@ public class LrcGetter {
             }
         }
 
-        ILrcProvider.LyricResult currentResult = lyricsDatabase.searchLyricFromDatabase(mediaMetadata);
+        ILrcProvider.LyricResult currentResult = lyricsDatabase.searchLyricFromDatabase(mediaInfo);
         if (currentResult != null) {
-            return LyricUtils.parseLyric(currentResult, mediaMetadata);
+            return LyricUtils.parseLyric(currentResult, mediaInfo);
         }
-        currentResult = searchLyricsResultByInfo(mediaMetadata);
+        currentResult = searchLyricsResultByInfo(mediaInfo);
         if  (currentResult == null) {
             MojiDetector detector = new MojiDetector();
             MojiConverter converter = new MojiConverter();
-            if (!detector.hasKana(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE)) && detector.hasLatin(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE))) {
-                ILrcProvider.MediaInfo mediaInfo = new ILrcProvider.MediaInfo(mediaMetadata);
-                mediaInfo.setTitle(converter.convertRomajiToHiragana(mediaInfo.getTitle()));
-                if (detector.hasLatin(mediaInfo.getTitle())) {
-                    return null;
+            if (!detector.hasKana(mediaInfo.getTitle()) && detector.hasLatin(mediaInfo.getTitle())) {
+                try {
+                    hiraganaMediaInfo = mediaInfo.clone();
+                    hiraganaMediaInfo.setTitle(converter.convertRomajiToHiragana(mediaInfo.getTitle()));
+                    if (detector.hasLatin(hiraganaMediaInfo.getTitle())) {
+                        return null;
+                    }
+                    currentResult = searchLyricsResultByInfo(hiraganaMediaInfo);
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
                 }
-                // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
-                currentResult = searchLyricsResultByInfo(mediaInfo);
+                // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata))
 
                 if (currentResult == null) {
                     mediaInfo.setTitle(converter.convertRomajiToKatakana(mediaInfo.getTitle()));
@@ -66,7 +75,7 @@ public class LrcGetter {
 
             }
             if (currentResult == null) {
-                lyricsDatabase.insertLyricIntoDatabase(null, mediaMetadata);
+                lyricsDatabase.insertLyricIntoDatabase(null, mediaInfo, packageName);
                 return null;
             }
         }
@@ -95,14 +104,10 @@ public class LrcGetter {
             }
         }
 
-        if (lyricsDatabase.insertLyricIntoDatabase(currentResult, mediaMetadata)) {
-            return LyricUtils.parseLyric(currentResult, mediaMetadata);
+        if (lyricsDatabase.insertLyricIntoDatabase(currentResult, mediaInfo, packageName)) {
+            return LyricUtils.parseLyric(currentResult, currentResult.resultInfo);
         }
         return null;
-    }
-
-    private static ILrcProvider.LyricResult searchLyricsResultByInfo(MediaMetadata mediaMetadata) {
-        return searchLyricsResultByInfo(new ILrcProvider.MediaInfo(mediaMetadata));
     }
 
     private static ILrcProvider.LyricResult searchLyricsResultByInfo(ILrcProvider.MediaInfo mediaInfo) {

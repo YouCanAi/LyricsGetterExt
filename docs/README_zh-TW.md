@@ -1,9 +1,9 @@
 # Lyrics Getter 擴充
 
-<div style="margin-top: 25px;display: flex; flex-direction: column; align-items: center;">
+<div align="center">
 <!-- <img src="https://github.com/VictorModi/LyricsGetterExt/edit/main/icon.svg" alt="icon" width="500"> -->
 <img src="https://raw.githubusercontent.com/VictorModi/LyricsGetterExt/main/icon.svg" alt="icon" width="150">
-<p style="margin-top: 10px;font-size: 16px;font-weight: bold;">LyricsGetter · 擴充</p>
+<p>LyricsGetter · 擴充</p>
 </div>
 
 ( [English](https://github.com/VictorModi/LyricsGetterExt/blob/main/README.md) / [简体中文](https://github.com/VictorModi/LyricsGetterExt/blob/main/docs/README_zh-CN.md) / 繁體中文 )

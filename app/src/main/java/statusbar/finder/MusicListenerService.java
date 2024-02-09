@@ -66,10 +66,10 @@ public class MusicListenerService extends NotificationListenerService {
     private Thread curLrcUpdateThread;
     private API lyricsGetterApi;
 
-    private final BroadcastReceiver mIgnoredPackageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mTargetPackageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Objects.equals(intent.getAction(), Constants.BROADCAST_IGNORED_APP_CHANGED)) {
+            if (Objects.equals(intent.getAction(), Constants.BROADCAST_TARGET_APP_CHANGED)) {
                 updateIgnoredPackageList();
                 unBindMediaListeners();
                 bindMediaListeners();
@@ -127,7 +127,7 @@ public class MusicListenerService extends NotificationListenerService {
             if (metadata == null) return;
             requiredLrcTitle = metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
             if (curLrcUpdateThread == null || !curLrcUpdateThread.isAlive()) {
-                curLrcUpdateThread = new LrcUpdateThread(getApplicationContext(), mHandler, metadata);
+                curLrcUpdateThread = new LrcUpdateThread(getApplicationContext(), mHandler, metadata, mMediaController.getPackageName());
                 curLrcUpdateThread.start();
             }
         }
@@ -194,7 +194,7 @@ public class MusicListenerService extends NotificationListenerService {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mLyricNotification = buildLrcNotification();
         mMediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mIgnoredPackageReceiver, new IntentFilter(Constants.BROADCAST_IGNORED_APP_CHANGED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTargetPackageReceiver, new IntentFilter(Constants.BROADCAST_TARGET_APP_CHANGED));
         updateIgnoredPackageList();
         bindMediaListeners();
     }
@@ -203,7 +203,7 @@ public class MusicListenerService extends NotificationListenerService {
     public void onListenerDisconnected() {
         stopLyric();
         unBindMediaListeners();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mIgnoredPackageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTargetPackageReceiver);
         super.onListenerDisconnected();
     }
 
@@ -319,18 +319,20 @@ public class MusicListenerService extends NotificationListenerService {
         private final Handler handler;
         private final MediaMetadata data;
         private final Context context;
+        private final String packageName;
 
-        public LrcUpdateThread(Context context, Handler handler, MediaMetadata data) {
+        public LrcUpdateThread(Context context, Handler handler, MediaMetadata data, String packageName) {
             super();
             this.data = data;
             this.handler = handler;
             this.context = context;
+            this.packageName = packageName;
         }
 
         @Override
         public void run() {
             if (handler == null) return;
-            Lyric lrc = LrcGetter.getLyric(context, data, systemLanguage);
+            Lyric lrc = LrcGetter.getLyric(context, data, systemLanguage, packageName);
             Message message = new Message();
             message.what = MSG_LYRIC_UPDATE_DONE;
             message.obj = lrc;
