@@ -14,6 +14,7 @@ import java.util.Locale;
 import statusbar.finder.provider.utils.HttpRequestUtil;
 import statusbar.finder.provider.utils.LyricSearchUtil;
 
+@Deprecated(since = "Can't Work")
 public class QQMusicProvider implements ILrcProvider {
 
     private static final String QM_BASE_URL = "https://c.y.qq.com/";
@@ -58,7 +59,7 @@ public class QQMusicProvider implements ILrcProvider {
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
-        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
+        return getLrcUrl(jsonArray, mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum());
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {

@@ -60,7 +60,7 @@ public class LyricSearchUtil {
     }
 
     public static String getSearchKey(ILrcProvider.MediaInfo mediaInfo) {
-        return getSearchKey(mediaInfo.title, mediaInfo.artist, mediaInfo.album);
+        return getSearchKey(mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum());
     }
 
     public static String parseArtists(JSONArray jsonArray, String key) {
@@ -101,7 +101,7 @@ public class LyricSearchUtil {
     }
 
     public static long calculateSongInfoDistance(ILrcProvider.MediaInfo mediaInfo, String title, String artist, String album) {
-        return calculateSongInfoDistance(mediaInfo.title, mediaInfo.artist, mediaInfo.album, title, artist, album);
+        return calculateSongInfoDistance(mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum(), title, artist, album);
     }
 
     public static long calculateSongInfoDistance(MediaMetadata metadata, String title, String artist, String album) {

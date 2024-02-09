@@ -51,15 +51,15 @@ public class LrcGetter {
             MojiConverter converter = new MojiConverter();
             if (!detector.hasKana(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE)) && detector.hasLatin(mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE))) {
                 ILrcProvider.MediaInfo mediaInfo = new ILrcProvider.MediaInfo(mediaMetadata);
-                mediaInfo.title = converter.convertRomajiToHiragana(mediaInfo.title);
-                if (detector.hasLatin(mediaInfo.title)) {
+                mediaInfo.setTitle(converter.convertRomajiToHiragana(mediaInfo.getTitle()));
+                if (detector.hasLatin(mediaInfo.getTitle())) {
                     return null;
                 }
                 // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
                 currentResult = searchLyricsResultByInfo(mediaInfo);
 
                 if (currentResult == null) {
-                    mediaInfo.title = converter.convertRomajiToKatakana(mediaInfo.title);
+                    mediaInfo.setTitle(converter.convertRomajiToKatakana(mediaInfo.getTitle()));
                     // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata));
                     currentResult = searchLyricsResultByInfo(mediaInfo);
                 }

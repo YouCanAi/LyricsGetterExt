@@ -1,6 +1,7 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
+import lombok.Data;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -27,11 +28,12 @@ public interface ILrcProvider {
         }
     }
 
+    @Data
     class MediaInfo {
-        public String title;
-        public String artist;
-        public String album;
-        public long duration;
+        private String title;
+        private String artist;
+        private String album;
+        private long duration;
         public MediaInfo(String title, String artist, String album, long duration) {
             this.title = title;
             this.artist = artist;
@@ -54,10 +56,6 @@ public interface ILrcProvider {
             if (this.album == null) {
                 this.album = "";
             }
-        }
-
-        public String toString() {
-            return String.format(Locale.getDefault(),"title: %s\nartist: %s\nalbum: %s\nduration: %d", title, artist, album, duration);
         }
     }
 

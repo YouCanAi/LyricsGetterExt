@@ -34,9 +34,6 @@ android {
         baseline = file("lint-baseline.xml")
     }
     namespace 'statusbar.finder'
-    kotlinOptions {
-        jvmTarget = '20'
-    }
 }
 
 dependencies {

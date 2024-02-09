@@ -75,9 +75,9 @@ public class MusixMatchProvider implements ILrcProvider {
                     // 无法通过 id 寻找到歌词时
                     // 则尝试使用直接搜索歌词的方法
                     String lrcUrl;
-                    String track = toSimpleURLEncode(mediaInfo.title);
-                    String artist = toSimpleURLEncode(mediaInfo.artist);
-                    String album = toSimpleURLEncode(mediaInfo.album);
+                    String track = toSimpleURLEncode(mediaInfo.getTitle());
+                    String artist = toSimpleURLEncode(mediaInfo.getArtist());
+                    String album = toSimpleURLEncode(mediaInfo.getAlbum());
                     lrcUrl = String.format(Locale.getDefault(), MUSIXMATCH_LRC_SERACH_URL_FORMAT,
                             MUSIXMATCH_USERTOKEN,
                             track,
@@ -114,7 +114,7 @@ public class MusixMatchProvider implements ILrcProvider {
 //    }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
-        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
+        return getLrcUrl(jsonArray, mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum());
     }
 
     private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
@@ -232,7 +232,6 @@ public class MusixMatchProvider implements ILrcProvider {
             return null;
         }
     }
-
 
     private String getMusixMatchUserToken(String guid) { // 获取 MusixMatch Token
         String result;
