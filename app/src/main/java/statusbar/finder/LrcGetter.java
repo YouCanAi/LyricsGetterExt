@@ -41,7 +41,7 @@ public class LrcGetter {
             try {
                 messageDigest = MessageDigest.getInstance("SHA");
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
                 return null;
             }
         }
@@ -63,7 +63,7 @@ public class LrcGetter {
                     }
                     currentResult = searchLyricsResultByInfo(hiraganaMediaInfo);
                 } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
+                    e.fillInStackTrace();
                 }
                 // Log.d(TAG, "newSearchInfo:" + new SimpleSongInfo(mediaMetadata))
 
@@ -121,7 +121,7 @@ public class LrcGetter {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
             }
         }
         return currentResult;

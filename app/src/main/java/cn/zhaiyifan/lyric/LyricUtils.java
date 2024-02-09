@@ -28,7 +28,7 @@ public class LyricUtils {
 //            }
 //            Collections.sort(lyric.sentenceList, new Lyric.SentenceComparator());
 //        } catch (IOException e) {
-//            e.printStackTrace();
+//            e.fillInStackTrace();
 //        }
 //        return lyric;
 //    }
@@ -66,7 +66,7 @@ public class LyricUtils {
             }
             lyric.sentenceList.sort(new Lyric.SentenceComparator());
         } catch (IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         if (lyricResult.mTranslatedLyric != null) {
             try {
@@ -77,7 +77,7 @@ public class LyricUtils {
                 }
                 lyric.transSentenceList.sort(new Lyric.SentenceComparator());
             } catch (IOException e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
             }
         }
         lyric.title = mediaInfo.getTitle();

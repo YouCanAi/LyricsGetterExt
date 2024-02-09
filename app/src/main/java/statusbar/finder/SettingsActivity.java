@@ -70,7 +70,7 @@ public class SettingsActivity extends FragmentActivity {
             intent.putExtra("app_uid", context.getApplicationInfo().uid);
             context.startActivity(intent);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             Uri uri = Uri.fromParts("package",context. getPackageName(), null);
@@ -94,7 +94,7 @@ public class SettingsActivity extends FragmentActivity {
             intent.setData(Uri.parse("package:" + context.getPackageName()));
             context.startActivity(intent);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -123,7 +123,7 @@ public class SettingsActivity extends FragmentActivity {
             PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
             versionName = pi.versionName;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         return versionName;
     }

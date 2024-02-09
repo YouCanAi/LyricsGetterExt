@@ -57,7 +57,7 @@ public class NeteaseProvider implements ILrcProvider {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         return null;

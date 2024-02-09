@@ -101,7 +101,7 @@ public class MusixMatchProvider implements ILrcProvider {
                 return result;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         return null;
@@ -175,7 +175,7 @@ public class MusixMatchProvider implements ILrcProvider {
                             snippet = UnicodeUtil.unicodeStr2String(curLyricObject.getString("snippet"));
                             description = UnicodeUtil.unicodeStr2String(curLyricObject.getString("description"));
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            e.fillInStackTrace();
                             return null;
                         }
 
@@ -226,7 +226,7 @@ public class MusixMatchProvider implements ILrcProvider {
             JSONArray translationsList = transResult.getJSONObject("message").getJSONObject("body").getJSONArray("translations_list");
             return translationsList.length() > 0 ? translationsList : null;
         } catch (JSONException | IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
     }
@@ -240,7 +240,7 @@ public class MusixMatchProvider implements ILrcProvider {
             tokenJson = HttpRequestUtil.getJsonResponse(tokenURL);
             result = tokenJson.getJSONObject("message").getJSONObject("body").getString("user_token");
         } catch (JSONException | IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         return result;

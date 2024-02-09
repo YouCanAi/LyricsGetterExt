@@ -72,7 +72,7 @@ public class LyricSearchUtil {
             }
             return stringBuilder.toString();
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         return null;
     }

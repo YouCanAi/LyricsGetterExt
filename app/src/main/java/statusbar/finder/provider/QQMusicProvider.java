@@ -54,7 +54,7 @@ public class QQMusicProvider implements ILrcProvider {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         return null;

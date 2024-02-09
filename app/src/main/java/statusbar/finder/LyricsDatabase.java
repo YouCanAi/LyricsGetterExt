@@ -63,7 +63,7 @@ public class LyricsDatabase extends SQLiteOpenHelper {
                 db.setTransactionSuccessful();
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
                 return false;
             } finally {
                 db.endTransaction();
@@ -77,7 +77,7 @@ public class LyricsDatabase extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return false;
         } finally {
             db.endTransaction();

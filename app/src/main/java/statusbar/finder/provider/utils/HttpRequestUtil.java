@@ -68,7 +68,7 @@ public class HttpRequestUtil {
         try {
             jsonObject = new JSONObject(new String(data));
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         in.close();
