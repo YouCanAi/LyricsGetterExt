@@ -9,11 +9,7 @@
     <string name="add_package_to_title">增加應用程式</string>
     <string name="enabled_title">開啟</string>
     <string name="lyricsGetterStatus_title">Lyrics Getter 連接狀態</string>
-    <string name="ignored_apps_title">忽略應用程式</string>
-    <string name="ignored_rules_title">匯入忽略應用程式規則</string>
-    <string name="ignored_rules_summary">從 Lyrics Getter 匯入 Hook 規則，並將規則內的應用程式進行忽略，避免重複輸出歌詞。</string>
-    <string name="unsupport_rom_summary">不支援目前 ROM</string>
-    <string name="unsupport_rom_title">不支援</string>
+    <string name="target_apps_title">目標應用程式</string>
     <string name="toast_cannot_start_lyricsgetter">很抱歉，LyricsGetter啟動失敗。請檢查是否正確安裝LyricsGetter。</string>
     <string name="toast_cannot_get_rules">很抱歉，忽略應用程式規則更新失敗，請檢查您的網路設定。</string>
     <string name="toast_get_notification_permission">尚未取得通知權限，請在下一個畫面中允許本應用程式的通知權限。</string>

@@ -13,8 +13,24 @@ import statusbar.finder.provider.ILrcProvider;
 public class LyricsDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Lyrics.db";
-    private static final int DATABASE_VERSION = 1;
-
+    private static final int DATABASE_VERSION = 2;
+    private static final String CREATE_TABLE =
+            "CREATE TABLE IF NOT EXISTS Lyrics (" +
+            "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "origin_title TEXT NOT NULL," +
+            "origin_artist TEXT," +
+            "origin_album TEXT," +
+            "origin_package_name TEXT," +
+            "duration BIGINT," +
+            "distance BIGINT," +
+            "result_title TEXT," +
+            "result_artist TEXT," +
+            "result_album TEXT," +
+            "lyric TEXT," +
+            "translated_lyric TEXT," +
+            "lyric_source TEXT," +
+            "added_date DATETIME DEFAULT CURRENT_TIMESTAMP," +
+            "_offset INTEGER)";
 
 
     public LyricsDatabase(@Nullable Context context) {
@@ -24,52 +40,44 @@ public class LyricsDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS Lyrics (" +
-                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "song TEXT NOT NULL," +
-                "artist TEXT," +
-                "album TEXT," +
-                "duration BIGINT," +
-                "distance BIGINT," +
-                "lyric TEXT," +
-                "translated_lyric TEXT," +
-                "lyric_source TEXT," +
-                "added_date DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                "_offset INTEGER)";
-        db.execSQL(createTableSQL);
+        db.execSQL(CREATE_TABLE);
     }
 
-    public boolean insertLyricIntoDatabase(ILrcProvider.LyricResult lyricResult, MediaMetadata mediaMetadata) {
-        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+    public boolean insertLyricIntoDatabase(ILrcProvider.LyricResult lyricResult, ILrcProvider.MediaInfo originMediaInfo, String packageName) {
 
-        if (song == null || artist == null) {
+        if (originMediaInfo.getTitle() == null) {
             return false;
         }
 
-        String query = "INSERT INTO Lyrics (song, artist, album, duration, distance, lyric, translated_lyric, lyric_source, _offset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Lyrics (" +
+                "origin_title, origin_artist, origin_album, origin_package_name, " +
+                "duration, distance, result_title, result_artist, result_album, " +
+                "lyric, translated_lyric, lyric_source, _offset) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         if (lyricResult == null) {
             try {
-                db.execSQL(query, new Object[]{song, artist, album, duration, 0, "", "", "Local", 0});
+                db.execSQL(query, new Object[]{originMediaInfo.getTitle(), originMediaInfo.getArtist(), originMediaInfo.getAlbum(),
+                        originMediaInfo.getDuration(), packageName, originMediaInfo.getDuration(), null, null, null, null, null, null, 0});
                 db.setTransactionSuccessful();
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
                 return false;
             } finally {
                 db.endTransaction();
             }
         }
         try {
-            db.execSQL(query, new Object[]{song, artist, album, duration, lyricResult.mDistance, lyricResult.mLyric, lyricResult.mTranslatedLyric, lyricResult.mSource, lyricResult.mOffset});
+            db.execSQL(query, new Object[]{originMediaInfo.getTitle(), originMediaInfo.getArtist(), originMediaInfo.getAlbum(),
+                    originMediaInfo.getDuration(), packageName, originMediaInfo.getDuration(), lyricResult.resultInfo.getTitle()
+                    , lyricResult.resultInfo.getArtist(), lyricResult.resultInfo.getAlbum(), lyricResult.mLyric, lyricResult.mTranslatedLyric,
+                    lyricResult.mSource, 0});
             db.setTransactionSuccessful();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return false;
         } finally {
             db.endTransaction();
@@ -77,25 +85,21 @@ public class LyricsDatabase extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public ILrcProvider.LyricResult searchLyricFromDatabase(MediaMetadata mediaMetadata) {
-        String song = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        long duration = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+    public ILrcProvider.LyricResult searchLyricFromDatabase(ILrcProvider.MediaInfo mediaInfo) {
         @SuppressLint("Recycle") Cursor cursor;
-        if (song == null || artist == null) {
+        if (mediaInfo.getTitle() == null || mediaInfo.getArtist() == null) {
             return null;
         }
 
         ILrcProvider.LyricResult result = new ILrcProvider.LyricResult();
         SQLiteDatabase db = this.getReadableDatabase();
-        Log.d("searchLyricFromDatabase: ", String.format("SearchInfo : %s - %s - %s - %d", song, artist, album, duration));
-        if (album != null) {
-            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE song = ? AND artist = ? AND album = ? AND duration = ?";
-            cursor = db.rawQuery(query, new String[]{song, artist, album, String.valueOf(duration)});
+        Log.d("searchLyricFromDatabase: ", String.format("SearchInfo : %s - %s - %s - %d", mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum(), mediaInfo.getDuration()));
+        if (mediaInfo.getAlbum() != null) {
+            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE origin_title = ? AND origin_artist = ? AND origin_album = ? AND duration = ?";
+            cursor = db.rawQuery(query, new String[]{mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum(), String.valueOf(mediaInfo.getDuration())});
         } else {
-            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE song = ? AND artist = ? AND duration = ?";
-            cursor = db.rawQuery(query, new String[]{song, artist, String.valueOf(duration)});
+            String query = "SELECT lyric, translated_lyric, lyric_source, distance, _offset FROM Lyrics WHERE origin_title = ? AND origin_artist = ? AND origin_duration = ?";
+            cursor = db.rawQuery(query, new String[]{mediaInfo.getTitle(), mediaInfo.getArtist(), String.valueOf(mediaInfo.getDuration())});
         }
 
 
@@ -117,10 +121,25 @@ public class LyricsDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // 更新数据表结构后在此处添加内容
-    }
-
-    class LyricsSearchCondition {
-
+        if (oldVersion == 1) {
+            String copyDataSQL ="INSERT INTO " +
+                    "LyricsTemp " +
+                    "(origin_title, origin_artist, origin_album, duration, distance, lyric, translated_lyric, lyric_source, added_date, _offset) " +
+                    "SELECT " +
+                    "song, artist, album, duration, distance, lyric, translated_lyric, lyric_source, added_date, _offset " +
+                    "FROM Lyrics";
+            String dropOldTableSQL = "DROP TABLE IF EXISTS Lyrics";
+            String renameNewTableSQL = "ALTER TABLE LyricsTemp RENAME TO Lyrics";
+            db.beginTransaction();
+            try {
+                db.execSQL(CREATE_TABLE);
+                db.execSQL(copyDataSQL);
+                db.execSQL(dropOldTableSQL);
+                db.execSQL(renameNewTableSQL);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
     }
 }

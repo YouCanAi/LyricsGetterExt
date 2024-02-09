@@ -1,6 +1,8 @@
 package statusbar.finder.provider;
 
 import android.media.MediaMetadata;
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -12,10 +14,10 @@ public interface ILrcProvider {
     class LyricResult {
         public String mLyric;
         public String mTranslatedLyric;
-        public long mDistance;
+        public long mDistance = 0;
         public String mSource = "Local";
         public int mOffset = 0;
-        public MediaInfo realInfo;
+        public MediaInfo resultInfo;
 
         public String toSting() {
             return "Distance: " + mDistance + "\n" +
@@ -23,21 +25,30 @@ public interface ILrcProvider {
                     "Offset: " + mOffset + "\n" +
                     "Lyric: " + mLyric + "\n" +
                     "TranslatedLyric: " + mTranslatedLyric + "\n" +
-                    "RealInfo: " + realInfo;
+                    "RealInfo: " + resultInfo;
         }
     }
 
+    @Data
     class MediaInfo {
-        public String title;
-        public String artist;
-        public String album;
-        public long duration;
-        public MediaInfo(String title, String artist, String album, long duration) {
+        private String title;
+        private String artist;
+        private String album;
+        private long duration;
+        private long distance;
+
+        public MediaInfo(String title, String artist, String album, long distance) {
             this.title = title;
             this.artist = artist;
             this.album = album;
-            this.duration = duration;
+            this.distance = distance;
         }
+//        public MediaInfo(String title, String artist, String album, long duration) {
+//            this.title = title;
+//            this.artist = artist;
+//            this.album = album;
+//            this.duration = duration;
+//        }
 
         public MediaInfo(MediaMetadata mediaMetadata) {
             this.title = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
@@ -56,8 +67,10 @@ public interface ILrcProvider {
             }
         }
 
-        public String toString() {
-            return String.format(Locale.getDefault(),"title: %s\nartist: %s\nalbum: %s\nduration: %d", title, artist, album, duration);
+        @NotNull
+        @Override
+        public MediaInfo clone() throws CloneNotSupportedException {
+            return (MediaInfo) super.clone();
         }
     }
 

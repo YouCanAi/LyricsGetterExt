@@ -28,7 +28,7 @@ public class LyricUtils {
 //            }
 //            Collections.sort(lyric.sentenceList, new Lyric.SentenceComparator());
 //        } catch (IOException e) {
-//            e.printStackTrace();
+//            e.fillInStackTrace();
 //        }
 //        return lyric;
 //    }
@@ -51,7 +51,12 @@ public class LyricUtils {
         }
     }
 
+    @Deprecated
     public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, MediaMetadata mediaMetadata) {
+        return parseLyric(lyricResult, new ILrcProvider.MediaInfo(mediaMetadata));
+    }
+
+    public static Lyric parseLyric(ILrcProvider.LyricResult lyricResult, ILrcProvider.MediaInfo mediaInfo) {
         Lyric lyric = new Lyric();
         try {
             BufferedReader br = new BufferedReader(new StringReader(lyricResult.mLyric));
@@ -61,7 +66,7 @@ public class LyricUtils {
             }
             lyric.sentenceList.sort(new Lyric.SentenceComparator());
         } catch (IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         if (lyricResult.mTranslatedLyric != null) {
             try {
@@ -72,13 +77,13 @@ public class LyricUtils {
                 }
                 lyric.transSentenceList.sort(new Lyric.SentenceComparator());
             } catch (IOException e) {
-                e.printStackTrace();
+                e.fillInStackTrace();
             }
         }
-        lyric.title = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        lyric.artist = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        lyric.album = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        lyric.length = mediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        lyric.title = mediaInfo.getTitle();
+        lyric.artist = mediaInfo.getArtist();
+        lyric.album = mediaInfo.getAlbum();
+        lyric.length = mediaInfo.getDuration();
         lyric.offset = lyricResult.mOffset;
         return lyric;
     }

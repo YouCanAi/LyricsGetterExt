@@ -35,7 +35,7 @@ public class NeteaseProvider implements ILrcProvider {
             searchResult = HttpRequestUtil.getJsonResponse(searchUrl);
             if (searchResult != null && searchResult.getLong("code") == 200) {
                 JSONArray array = searchResult.getJSONObject("result").getJSONArray("songs");
-                Pair<String, Long> pair = getLrcUrl(array, mediaInfo);
+                Pair<String, MediaInfo> pair = getLrcUrl(array, mediaInfo);
                 if (pair != null) {
                     JSONObject lrcJson = HttpRequestUtil.getJsonResponse(pair.first);
                     if (lrcJson == null) {
@@ -48,40 +48,44 @@ public class NeteaseProvider implements ILrcProvider {
                     } catch (JSONException e) {
                         result.mTranslatedLyric = null;
                     }
-                    result.mDistance = pair.second;
+                    result.mDistance = pair.second.getDistance();
                     result.mSource = "Netease";
-                    result.realInfo = mediaInfo;
+                    result.resultInfo = pair.second;
                     return result;
                 } else {
                     return null;
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return null;
         }
         return null;
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
-        return getLrcUrl(jsonArray, mediaInfo.title, mediaInfo.artist, mediaInfo.album);
+    private static Pair<String, MediaInfo> getLrcUrl(JSONArray jsonArray, ILrcProvider.MediaInfo mediaInfo) throws JSONException {
+        return getLrcUrl(jsonArray, mediaInfo.getTitle(), mediaInfo.getArtist(), mediaInfo.getAlbum());
     }
 
-    private static Pair<String, Long> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
+    private static Pair<String, MediaInfo> getLrcUrl(JSONArray jsonArray, String songTitle, String songArtist, String songAlbum) throws JSONException {
         long currentID = -1;
         long minDistance = 10000;
+        String soundName = null;
+        JSONArray artists = null;
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String soundName = jsonObject.getString("name");
+            soundName = jsonObject.getString("name");
             String albumName = jsonObject.getJSONObject("album").getString("name");
-            JSONArray artists = jsonObject.getJSONArray("artists");
+            artists = jsonObject.getJSONArray("artists");
             long dis = LyricSearchUtil.calculateSongInfoDistance(songTitle, songArtist, songAlbum, soundName, LyricSearchUtil.parseArtists(artists, "name"), albumName);
             if (dis < minDistance) {
                 minDistance = dis;
                 currentID = jsonObject.getLong("id");
             }
         }
-        if (currentID == -1) {return null;}
-        return new Pair<>(String.format(Locale.getDefault(), NETEASE_LRC_URL_FORMAT, currentID), minDistance);
+        if (currentID == -1) {
+            return null;
+        }
+        return new Pair<>(String.format(Locale.getDefault(), NETEASE_LRC_URL_FORMAT, currentID), new MediaInfo(soundName, LyricSearchUtil.parseArtists(artists, "name"), null, minDistance));
     }
 }
