@@ -233,7 +233,7 @@ public class MusicListenerService extends NotificationListenerService {
 
     private void updateIgnoredPackageList() {
         mTargetPackageList.clear();
-        String value = mSharedPreferences.getString(Constants.PREFERENCE_KEY_IGNORED_PACKAGES, "");
+        String value = mSharedPreferences.getString(Constants.PREFERENCE_KEY_TARGET_PACKAGES, "");
         String[] arr = value.split(";");
         for (String str : arr) {
             if (TextUtils.isEmpty(str)) continue;
