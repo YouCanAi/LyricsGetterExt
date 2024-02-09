@@ -52,7 +52,7 @@ public class MusicListenerService extends NotificationListenerService {
     private MediaController mMediaController;
     private NotificationManager mNotificationManager;
 
-    private final ArrayList<String> mIgnoredPackageList = new ArrayList<>();
+    private final ArrayList<String> mTargetPackageList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
 
     private Lyric mLyric;
@@ -139,7 +139,7 @@ public class MusicListenerService extends NotificationListenerService {
             if (mMediaController != null) mMediaController.unregisterCallback(mMediaCallback);
             if (controllers == null) return;
             for (MediaController controller : controllers) {
-                if (mIgnoredPackageList.contains(controller.getPackageName())) continue;
+                if (!mTargetPackageList.contains(controller.getPackageName())) continue;
                 if (getMediaControllerPlaybackState(controller) == PlaybackState.STATE_PLAYING) {
                     mMediaController = controller;
                     break;
@@ -232,12 +232,12 @@ public class MusicListenerService extends NotificationListenerService {
     }
 
     private void updateIgnoredPackageList() {
-        mIgnoredPackageList.clear();
+        mTargetPackageList.clear();
         String value = mSharedPreferences.getString(Constants.PREFERENCE_KEY_IGNORED_PACKAGES, "");
         String[] arr = value.split(";");
         for (String str : arr) {
             if (TextUtils.isEmpty(str)) continue;
-            mIgnoredPackageList.add(str.trim());
+            mTargetPackageList.add(str.trim());
         }
     }
 
